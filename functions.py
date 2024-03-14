@@ -4,6 +4,7 @@ inference_api_key="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"
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 import os
+import Levenshtein
 
 directory_path = "./"
 
@@ -21,13 +22,28 @@ for txt_file in text_files:
             sample_data.append(text)
 
 def text_similarity(text1, text2):
+    print("Text 1: ", text1)    
+    print("Text 2: ", text2)    
     data = list()
     data.append(text1)
     data.append(text2)
+    lines1 = text1.split("\n")
+    lines2 = text2.split("\n")
+    print(lines1)
+    print(lines2)
+    similar_lines = []
+    for i, line1 in enumerate(lines1, start=1):
+            for j, line2 in enumerate(lines2, start=1):
+                if len(line1.strip()) == 0 or len(line2.strip()) == 0:
+                    continue
+                similarity = Levenshtein.ratio(line1.strip(), line2.strip())
+                if similarity >= 0.8:
+                    print(f"Similar lines found: \n{line1.strip()} \n{line2.strip()} \nSimilarity: {similarity}\n")
+                    similar_lines.append((i,line1.strip(),j, line2.strip(), similarity))
     embeddings = embeddings_model.embed_documents(data)
     cs_mat = cosine_similarity(embeddings)
     print(cs_mat)
-    return cs_mat[0][1]
+    return (cs_mat[0][1], similar_lines)
 
 def check_similarity(text):
     data = list()
@@ -36,26 +52,26 @@ def check_similarity(text):
     embeddings = embeddings_model.embed_documents(data)
     cs_mat = cosine_similarity(embeddings)
     max = 0
+    file = None
     for i in range(len(cs_mat)-1):
         if cs_mat[-1][i] > max:
             max = cs_mat[-1][i]
+            file = text_files[i]
         print(f"Similarity score with {text_files[i]}: {cs_mat[-1][i]}")
 
-    return max
-
-
-def print_sim_scores_for_all(data,cosine_similarity_mat):
-    entries=[]
-    i=0
-    while(i<len(data)):
-        j=0
-        while(j<len(data)):
-            if i !=j:
-                entries.append([data[i],data[j],cosine_similarity_mat[i][j]])         
-            j+=1
-        i+=1
-        
-    df=pd.DataFrame(entries)
-    df.columns=["text1","text2","sim score"]
-    return df
+    lines1 = text.split("\n")
+    lines2 = sample_data[text_files.index(file)].split("\n")
+    similar_lines = []
+    for i, line1 in enumerate(lines1, start=1):
+            for j, line2 in enumerate(lines2, start=1):
+                if len(line1.strip()) == 0 or len(line2.strip()) == 0:
+                    continue
+                similarity = Levenshtein.ratio(line1.strip(), line2.strip())
+                if similarity >= 0.8:
+                    print(f"Similar lines found: \n{line1.strip()} \n{line2.strip()} \nSimilarity: {similarity}\n")
+                    similar_lines.append((i,line1.strip(),j, line2.strip(), similarity))
+    embeddings = embeddings_model.embed_documents(data)
+    cs_mat = cosine_similarity(embeddings)
+    print(cs_mat)
+    return (max,similar_lines,file)
     

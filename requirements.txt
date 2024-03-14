@@ -4,3 +4,4 @@ simhash
 langchain
 pandas
 streamlit
+python-Levenshtein

@@ -21,7 +21,7 @@ def main():
         page3()
     
 def home_page():
-    st.title("Welcome to PalgCheck")
+    st.title("Welcome to PlagCheck")
     st.write("A revolutionary tool to check the similarity between two texts.")
 
 def page1():
@@ -52,8 +52,16 @@ def page1():
         submit_button = st.button("Submit")
     
     if submit_button:
-        similarity_score = round(text_similarity(text1, text2),4)*100
-        st.write(f"Similarity Score:  {similarity_score} %")
+        similarity_score,similar_lines = text_similarity(text1, text2)
+        similarity_score= round(similarity_score,4)*100
+        st.write(f"\nSimilarity Score:  {similarity_score} %")
+        if len(similar_lines)==0:
+            st.write("No similar lines found")
+        else:
+            table_data = [["File 1 ", "File 2 ", "Similarity"]]
+            for line in similar_lines:
+                table_data.append([f"{line[0]}. {line[1]}", f"{line[2]}. {line[3]}", f"{round(line[4],4)*100}"])
+            st.table(table_data)
 
 def page2():
     st.title("Check similarity with files in database")
@@ -76,8 +84,16 @@ def page2():
         submit_button = st.button("Submit")
 
     if submit_button:
-        similarity_score = round(check_similarity(text),4)*100
-        st.write(f"Similarity Score: {similarity_score} %")
+        similarity_score,similar_lines,file = check_similarity(text)
+        similarity_score= round(similarity_score,4)*100
+        st.write(f"\nSimilarity Score:  {similarity_score} % with file \"{file}\"")
+        if len(similar_lines)==0:
+            st.write("No similar lines found")
+        else:
+            table_data = [["File 1 ", "File 2 ", "Similarity"]]
+            for line in similar_lines:
+                table_data.append([f"{line[0]}. {line[1]}", f"{line[2]}. {line[3]}", f"{round(line[4],4)*100}"])
+            st.table(table_data)
 
 def page3():
     st.title("Check Plag with GPT")
@@ -87,7 +103,6 @@ def page3():
         submit_button = st.button("Submit")
     if submit_button:
         st.write("Similarity Score:  81.97 %")
-
 
 
 if __name__ == "__main__":
