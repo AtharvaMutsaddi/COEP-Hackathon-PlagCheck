@@ -33,12 +33,12 @@ def page1():
     submit_button = None 
 
     if input_method == "Upload Text File":
-        uploaded_file1 = st.file_uploader("Upload the first .txt file", type=["txt"])
+        uploaded_file1 = st.file_uploader("Upload the first file")
         if uploaded_file1 is not None:
             text1 = uploaded_file1.read().decode("utf-8")
             st.text_area("Uploaded Text 1", text1, height=200)
 
-        uploaded_file2 = st.file_uploader("Upload the second .txt file", type=["txt"])
+        uploaded_file2 = st.file_uploader("Upload the second file")
         if uploaded_file2 is not None:
             text2 = uploaded_file2.read().decode("utf-8")
             st.text_area("Uploaded Text 2", text2, height=200)
@@ -71,7 +71,7 @@ def page2():
     submit_button = None
     
     if input_method == "Upload Text File":
-        uploaded_file = st.file_uploader("Upload a .txt file", type=["txt"])
+        uploaded_file = st.file_uploader("Upload a file")
         if uploaded_file is not None:
             text = uploaded_file.read().decode("utf-8")
             st.text_area("Uploaded Text", text, height=200)
