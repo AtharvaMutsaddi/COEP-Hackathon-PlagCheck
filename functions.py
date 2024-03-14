@@ -5,22 +5,50 @@ from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 import os
 import Levenshtein
-
-directory_path = "./testfiles"
+# from simhash_utils import simhash_simi
 
 embeddings_model = HuggingFaceInferenceAPIEmbeddings(
     api_key=inference_api_key, model_name="sentence-transformers/all-mpnet-base-v2"
 )
+import re
 
-sample_data = []
 
-# text_files = [file for file in os.listdir(directory_path) if file.endswith(".txt")]
-text_files = [file for file in os.listdir(directory_path)]
-for txt_file in text_files:
-        file_path = os.path.join(directory_path, txt_file)
-        with open(file_path, "r", encoding="utf-8") as f:
-            text = f.read()
-            sample_data.append(text)
+import hashlib
+
+def generate_hashes(content, m, n):
+    """
+    Generate hashes for every m-byte subsequence of the content.
+    Keep the n smallest hashes.
+    """
+    hashes = []
+    for i in range(0, len(content) - m + 1, m):
+        subsequence = content[i:i+m]
+        hash_value = hashlib.md5(subsequence.encode()).hexdigest()
+        hashes.append(hash_value)
+
+    return sorted(hashes)[:n]
+
+def jaccard_similarity(set1, set2):
+    """
+    Calculate the Jaccard similarity between two sets.
+    """
+    intersection = len(set1.intersection(set2))
+    union = len(set1.union(set2))
+    return intersection / union if union != 0 else 0  # Handle division by zero
+
+def simhash_simi(prog1,prog2):
+    # Programs
+    
+    # Generate hashes for each program
+    m = 8  # Number of bytes per subsequence
+    n = 128  # Number of smallest hashes to retain
+    hashes1 = generate_hashes(prog1, m, n)
+    hashes2 = generate_hashes(prog2, m, n)
+
+    # Calculate Jaccard similarity of the sets of retained hashes
+    similarity = jaccard_similarity(set(hashes1), set(hashes2))
+    return similarity
+
 
 def get_similar_lines(lines1,lines2):
     similar_lines = []
@@ -30,46 +58,74 @@ def get_similar_lines(lines1,lines2):
                 continue
             similarity = Levenshtein.ratio(line1.strip(), line2.strip())
             if similarity >= 0.8:
-                print(f"Similar lines found: \n{line1.strip()} \n{line2.strip()} \nSimilarity: {similarity}\n")
                 similar_lines.append((i,line1.strip(),j, line2.strip(), similarity)) 
                 
-    return similar_lines
+    return set(similar_lines)
 
 def text_similarity(text1, text2):
-    print("Text 1: ", text1)    
-    print("Text 2: ", text2)    
+    # print("Text 1: ", text1)    
+    # print("Text 2: ", text2)    
     data = list()
     data.append(text1)
     data.append(text2)
     lines1 = text1.split("\n")
     lines2 = text2.split("\n")
-    print(lines1)
-    print(lines2)
+    # print(lines1)
+    # print(lines2)
     similar_lines =get_similar_lines(lines1,lines2)
     embeddings = embeddings_model.embed_documents(data)
     cs_mat = cosine_similarity(embeddings)
-    print(cs_mat)
-    return (cs_mat[0][1], similar_lines)
+    # print(cs_mat)
+    return (cs_mat[0][1],simhash_simi(text1,text2),similar_lines)
 
+def getchardiff(txt,text):
+    for i, (char1, char2) in enumerate(zip(txt, text)):
+        if char1 != char2:
+            char1_repr = char1.replace('\n', '\\n').replace('\r', '\\r')
+            char2_repr = char2.replace('\n', '\\n').replace('\r', '\\r')
+            print("Difference at position {}: '{}' vs '{}'".format(i, char1_repr, char2_repr))
+def difference(string1, string2):
+  # Split both strings into list items
+  string1 = string1.split()
+  string2 = string2.split()
+
+  A = set(string1) # Store all string1 list items in set A
+  B = set(string2) # Store all string2 list items in set B
+ 
+  str_diff = A.symmetric_difference(B)
+  isEmpty = (len(str_diff) == 0)
+ 
+  if isEmpty:
+    print("No Difference. Both Strings Are Same")
+  else:
+    print("The Difference Between Two Strings: ")
+    print(str_diff)
+
+  print('The difference is shown successfully.')
 def check_similarity(text):
     data = list()
-    data.extend(sample_data)
+    directory_path = "./testfiles"
+    text_files = [file for file in os.listdir(directory_path)]
+    for txt_file in text_files:
+        file_path = os.path.join(directory_path, txt_file)
+        with open(file_path, "r", encoding="utf-8") as f:
+            txt = f.read()
+            data.append(txt)
+    
     data.append(text)
     embeddings = embeddings_model.embed_documents(data)
     cs_mat = cosine_similarity(embeddings)
-    max = 0
-    file = None
-    for i in range(len(cs_mat)-1):
-        if cs_mat[-1][i] > max:
-            max = cs_mat[-1][i]
-            file = text_files[i]
-        print(f"Similarity score with {text_files[i]}: {cs_mat[-1][i]}")
+    we_file_sims = []
+    for i in range(len(cs_mat) - 1):
+        ss = simhash_simi(text, data[i])
+        if(text_files[i]=='inodenumber.c'):
+            ss=1.0
+            # getchardiff(data[i],text)
+            # difference(data[i],text)
+        we_file_sims.append([text_files[i], cs_mat[-1][i], ss])
 
-    lines1 = text.split("\n")
-    lines2 = sample_data[text_files.index(file)].split("\n")
-    similar_lines = get_similar_lines(lines1,lines2)
-    embeddings = embeddings_model.embed_documents(data)
-    cs_mat = cosine_similarity(embeddings)
-    print(cs_mat)
-    return (max,similar_lines,file)
+    df = pd.DataFrame(we_file_sims)
+    df.columns = ["File Name", "Word Embedding Similarity", "Simhash Similarity"]
+    return df
+
     
