@@ -84,6 +84,7 @@ def getchardiff(txt,text):
             char1_repr = char1.replace('\n', '\\n').replace('\r', '\\r')
             char2_repr = char2.replace('\n', '\\n').replace('\r', '\\r')
             print("Difference at position {}: '{}' vs '{}'".format(i, char1_repr, char2_repr))
+
 def difference(string1, string2):
   # Split both strings into list items
   string1 = string1.split()
