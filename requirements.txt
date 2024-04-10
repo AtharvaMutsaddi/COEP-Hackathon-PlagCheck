@@ -5,3 +5,7 @@ langchain
 pandas
 streamlit
 python-Levenshtein
+python-docx
+nbformat
+PyPDF2
+pymongo
