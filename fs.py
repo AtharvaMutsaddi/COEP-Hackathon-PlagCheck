@@ -1,6 +1,6 @@
 import docx, nbformat, os, zipfile
-from PyPDF2 import PdfReader
-
+from PyPDF2 import PdfReader,PdfFileReader
+import io
 programming_file_extensions = [
     ".txt",  # Text Files
     ".py",  # Python
@@ -145,11 +145,21 @@ def get_file_mapping(input_zip_path):
 
 def read_files(input_zip_path, file_type, file_mapping):
     file_paths = file_mapping.get(file_type, [])
+    print(file_paths)
     file_contents = []
 
     def read_from_zip(zip_ref, file_path):
-        with zip_ref.open(file_path) as file:
-            file_contents.append(file.read().decode())
+        file_name = zip_ref.namelist()[0]
+        # file_extension = "." + file_name.split(".")[-1]
+        if file_type==".pdf":
+            pdf_file = PdfReader(io.BytesIO(zip_ref.read(file_name)))
+            txt = ""
+            for page in pdf_file.pages:
+                txt += page.extract_text() + " "
+            file_contents.append(txt)
+        else:
+            with zip_ref.open(file_path) as file:
+                file_contents.append(file.read().decode())
 
     with zipfile.ZipFile(input_zip_path, "r") as outer_zip_ref:
         for file_path in file_paths:
@@ -164,11 +174,12 @@ def read_files(input_zip_path, file_type, file_mapping):
     return file_contents
 
 
-""" input_zip_path = 'cache/prototype.zip'
+input_zip_path = 'cache/temp.zip'
 file_mapping = get_file_mapping(input_zip_path)
 print("============================")
-print(file_mapping[".c"])
-print(read_files(input_zip_path, ".c", file_mapping)[4]) """
+print(file_mapping)
+# file_conts=read_files(input_zip_path, ".txt", file_mapping)
+print(read_files(input_zip_path, ".pdf", file_mapping)) 
 
 # print(File_Reader().get_type_of_file_and_data("prototype/functions.py"))
-# print(File_Reader().get_type_of_file_and_data("prototype/app.ipynb"))
+# print(File_Reader().get_type_of_file_and_data("cache/prototype/prototype/testfiles/more tests.zip\\more tests/112103079-1.patch"))
