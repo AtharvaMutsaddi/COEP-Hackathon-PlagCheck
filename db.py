@@ -86,3 +86,7 @@ class Database:
 # Database().create_record_and_upload_assignment("Data Science Book Upload Assignmnet","Computer Engineering","Third Year","Even Semester","DSCI_book.pdf")
 # Database().download_file('661622a6c1c17b17a1088b64')
 # print(Database().get_all_assignment_records_from_db())
+
+# Database().create_record_and_upload_assignment("SE Project Assgn","Computer Engineering","Third Year","Even Sem","SE Project Website Screenshots.zip")
+# print(Database().get_all_assignment_records_from_db())
+# Database().download_file('6615ff6fc147e92f08aba162')
