@@ -3,5 +3,8 @@ sentence-transformers
 simhash
 langchain
 pandas
+numpy
 streamlit
 python-Levenshtein
+hashlib
+gensim
