@@ -242,8 +242,10 @@ print(read_files(input_zip_path, ".pdf", file_mapping))
 # print(File_Reader().get_type_of_file_and_data("prototype/functions.py"))
 # print(File_Reader().get_type_of_file_and_data("cache/prototype/prototype/testfiles/more tests.zip\\more tests/112103079-1.patch"))
 
+
 """ extract_zip_recursively("testing/Assignments/Assignment 1.zip", "cache/")
 print(Folder_Structure().get_detailed_report_of_files("cache/Assignment 1")) """
 
 """ extract_zip_recursively("testing/Assignments/Assignment 2.zip", "cache/")
 print(Folder_Structure().get_detailed_report_of_files("cache/Assignment 2")) """
+

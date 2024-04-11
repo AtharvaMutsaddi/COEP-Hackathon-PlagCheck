@@ -1,0 +1,318 @@
+diff --git a/defs.h b/defs.h
+index 82fb982..33b84a4 100644
+--- a/defs.h
++++ b/defs.h
+@@ -120,6 +120,7 @@ void            userinit(void);
+ int             wait(void);
+ void            wakeup(void*);
+ void            yield(void);
++int		 nice(int,int);
+ 
+ // swtch.S
+ void            swtch(struct context**, struct context*);
+diff --git a/lapic.c b/lapic.c
+index b22bbd7..c83e21e 100644
+--- a/lapic.c
++++ b/lapic.c
+@@ -51,6 +51,13 @@ lapicw(int index, int value)
+   lapic[ID];  // wait for write to finish, by reading
+ }
+ 
++void
++change_time_quantum(int priority)
++{
++	lapicw(TICR,5000000*priority);
++}
++
++
+ void
+ lapicinit(void)
+ {
+diff --git a/proc.c b/proc.c
+index 806b1b1..aa9bc4d 100644
+--- a/proc.c
++++ b/proc.c
+@@ -17,7 +17,7 @@ static struct proc *initproc;
+ int nextpid = 1;
+ extern void forkret(void);
+ extern void trapret(void);
+-
++extern void change_time_quantum(int);
+ static void wakeup1(void *chan);
+ 
+ void
+@@ -88,6 +88,7 @@ allocproc(void)
+ found:
+   p->state = EMBRYO;
+   p->pid = nextpid++;
++  p->priority = 1;
+ 
+   release(&ptable.lock);
+ 
+@@ -198,6 +199,7 @@ fork(void)
+   }
+   np->sz = curproc->sz;
+   np->parent = curproc;
++  np->priority = np->parent->priority + 1;
+   *np->tf = *curproc->tf;
+ 
+   // Clear %eax so that fork returns 0 in the child.
+@@ -319,23 +321,39 @@ wait(void)
+ //  - swtch to start running that process
+ //  - eventually that process transfers control
+ //      via swtch back to the scheduler.
++
++
+ void
+ scheduler(void)
+ {
+   struct proc *p;
++  struct proc* temp;
+   struct cpu *c = mycpu();
+   c->proc = 0;
+   
+   for(;;){
+     // Enable interrupts on this processor.
+     sti();
+-
++    struct proc* selected;
+     // Loop over process table looking for process to run.
+     acquire(&ptable.lock);
+     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+       if(p->state != RUNNABLE)
+         continue;
+-
++      p->priority++;
++      selected = p;
++      
++      for(temp = ptable.proc;temp < &ptable.proc[NPROC];temp++){
++      	 if(temp->state != RUNNABLE){
++      	   continue;
++      	 }
++      	 if(selected->priority < temp->priority){
++      	   selected = temp;
++      	 }
++      }
++      
++      p = selected;
++      change_time_quantum(p->priority);
+       // Switch to chosen process.  It is the process's job
+       // to release ptable.lock and then reacquire it
+       // before jumping back to us.
+@@ -532,3 +550,16 @@ procdump(void)
+     cprintf("\n");
+   }
+ }
++
++int
++nice(int pid, int priority)
++{
++	struct proc* p;
++	for(p = ptable.proc;p<&ptable.proc[NPROC];p++){
++		if(p->pid == pid){
++			p->priority = priority;
++			break;
++		}
++	}
++	return pid;
++}
+diff --git a/proc.h b/proc.h
+index 1647114..3f9dcd0 100644
+--- a/proc.h
++++ b/proc.h
+@@ -37,6 +37,7 @@ enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+ // Per-process state
+ struct proc {
+   uint sz;                     // Size of process memory (bytes)
++  int priority;
+   pde_t* pgdir;                // Page table
+   char *kstack;                // Bottom of kernel stack for this process
+   enum procstate state;        // Process state
+diff --git a/syscall.c b/syscall.c
+index ee85261..ebc1780 100644
+--- a/syscall.c
++++ b/syscall.c
+@@ -103,6 +103,7 @@ extern int sys_unlink(void);
+ extern int sys_wait(void);
+ extern int sys_write(void);
+ extern int sys_uptime(void);
++extern int sys_nice(void);
+ 
+ static int (*syscalls[])(void) = {
+ [SYS_fork]    sys_fork,
+@@ -126,6 +127,7 @@ static int (*syscalls[])(void) = {
+ [SYS_link]    sys_link,
+ [SYS_mkdir]   sys_mkdir,
+ [SYS_close]   sys_close,
++[SYS_nice]    sys_nice,
+ };
+ 
+ void
+diff --git a/syscall.h b/syscall.h
+index bc5f356..fc06372 100644
+--- a/syscall.h
++++ b/syscall.h
+@@ -20,3 +20,4 @@
+ #define SYS_link   19
+ #define SYS_mkdir  20
+ #define SYS_close  21
++#define SYS_nice   22
+diff --git a/sysproc.c b/sysproc.c
+index 0686d29..2015d43 100644
+--- a/sysproc.c
++++ b/sysproc.c
+@@ -89,3 +89,15 @@ sys_uptime(void)
+   release(&tickslock);
+   return xticks;
+ }
++
++int
++sys_nice(void)
++{
++	int pid;
++	int priority;
++	
++	if(argint(0, &pid) < 0 || argint(1, &priority) < 0)
++    return -1;
++    
++	return nice(pid,priority);
++}
+diff --git a/user.h b/user.h
+index 4f99c52..e7556ed 100644
+--- a/user.h
++++ b/user.h
+@@ -23,6 +23,7 @@ int getpid(void);
+ char* sbrk(int);
+ int sleep(int);
+ int uptime(void);
++int nice(int,int);
+ 
+ // ulib.c
+ int stat(const char*, struct stat*);
+diff --git a/usertests.c b/usertests.c
+index a1e97e7..12be9b8 100644
+--- a/usertests.c
++++ b/usertests.c
+@@ -8,11 +8,95 @@
+ #include "traps.h"
+ #include "memlayout.h"
+ 
++
++
++#define NUM_PROCESSES 5
++#define NUM_PRIORITIES 5
++
+ char buf[8192];
+ char name[3];
+ char *echoargv[] = { "echo", "ALL", "TESTS", "PASSED", 0 };
+ int stdout = 1;
+ 
++void heavyTask() {
++    int i, j;
++    for (i = 0; i < 100000; i++) {
++        for (j = 0; j < 100000; j++) {
++            asm("nop");
++        }
++    }
++}
++
++void
++throughput_priority(void)
++{
++    int pid, i;
++    int start_time, end_time;
++    start_time = uptime();
++    int priorities[5] = {2, 3, 4, 5, 6};
++
++    printf(1, "Starting priority throughput test...\n");
++    pid = getpid();
++    
++    for (i = 0; i < 5; i++) {
++        pid = fork();
++        if (pid < 0) {
++            printf(1, "fork failed\n");
++            exit();
++        }
++        else if (pid == 0) {
++            nice(pid,priorities[i]);
++            heavyTask();
++            exit();
++        }
++    }
++
++    for (i = 0; i < 5; i++) {
++        wait();
++    }
++    end_time = uptime();
++    int time = end_time - start_time;
++    int throughput = 0;
++    throughput = (5*10000)/time;
++    printf(stdout,"Throughput for priority scheduling with nice():%d processes/sec\n",throughput);
++}
++
++void
++throughput_normal(void)
++{
++    int pid, i;
++    int start_time, end_time;
++    start_time = uptime();
++
++
++    printf(1, "Starting normal throughput test...\n");
++    pid = getpid();
++    
++    for (i = 0; i < 5; i++) {
++        pid = fork();
++        if (pid < 0) {
++            printf(1, "fork failed\n");
++            exit();
++        }
++        else if (pid == 0) {
++    	    nice(pid,4);
++            heavyTask();
++            exit();
++        }
++    }
++
++    for (i = 0; i < 5; i++) {
++        wait();
++    }
++    end_time = uptime();
++    int time = end_time - start_time;
++
++
++    int throughput = 0;
++    throughput = (5*10000)/time;
++    printf(stdout,"Normal throughput:%d processes/sec\n",throughput);
++}
++
+ // does chdir() call iput(p->cwd) in a transaction?
+ void
+ iputtest(void)
+@@ -1755,7 +1839,8 @@ main(int argc, char *argv[])
+     exit();
+   }
+   close(open("usertests.ran", O_CREATE));
+-
++  throughput_priority();
++  throughput_normal();
+   argptest();
+   createdelete();
+   linkunlink();
+@@ -1774,7 +1859,6 @@ main(int argc, char *argv[])
+   writetest();
+   writetest1();
+   createtest();
+-
+   openiputtest();
+   exitiputtest();
+   iputtest();
+diff --git a/usys.S b/usys.S
+index 8bfd8a1..116326e 100644
+--- a/usys.S
++++ b/usys.S
+@@ -29,3 +29,4 @@ SYSCALL(getpid)
+ SYSCALL(sbrk)
+ SYSCALL(sleep)
+ SYSCALL(uptime)
++SYSCALL(nice)
