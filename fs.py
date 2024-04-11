@@ -1,5 +1,6 @@
 import docx, nbformat, os, zipfile
-from PyPDF2 import PdfReader
+from PyPDF2 import PdfReader,PdfFileReader
+import io
 from pathlib import Path
 
 programming_file_extensions = [
@@ -162,11 +163,87 @@ def extract_zip_recursively(zip_file, extract_to):
 
                 os.remove(nested_zip_path)
 
-# extract_zip_recursively("testing/Assignment_1.zip", "cache/")
-# print(Folder_Structure().get_detailed_report_of_files("cache/Assignment_1"))
+def extract_files(zip_path):
+    file_mapping = {}
 
-# extract_zip_recursively("testing/Assignment_2.zip", "cache/")
-# print(Folder_Structure().get_detailed_report_of_files("cache/Assignment_2"))
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        for member in zip_ref.infolist():
+            if member.is_dir():
+                continue
+            file_extension = os.path.splitext(member.filename)[1]
+            if file_extension not in file_mapping:
+                file_mapping[file_extension] = []
+            file_mapping[file_extension].append(member.filename)
 
-# extract_zip_recursively("testing/Assignment_3.zip", "cache/")
-# print(Folder_Structure().get_detailed_report_of_files("cache/Assignment_3"))
+    return file_mapping
+
+
+def traverse_zip(zip_ref, file_mapping, prefix=""):
+    for member in zip_ref.infolist():
+        if member.is_dir():
+            continue
+        file_extension = os.path.splitext(member.filename)[1]
+        if file_extension in (".zip", ".gz", ".tar"):
+            nested_zip_path = os.path.join(prefix, member.filename)
+            with zip_ref.open(member) as nested_zip_file:
+                nested_zip_ref = zipfile.ZipFile(nested_zip_file)
+                traverse_zip(nested_zip_ref, file_mapping, nested_zip_path)
+        else:
+            if file_extension not in file_mapping:
+                file_mapping[file_extension] = []
+            file_mapping[file_extension].append(os.path.join(prefix, member.filename))
+
+
+def get_file_mapping(input_zip_path):
+    file_mapping = {}
+    with zipfile.ZipFile(input_zip_path, "r") as zip_ref:
+        traverse_zip(zip_ref, file_mapping)
+    return file_mapping
+
+
+def read_files(input_zip_path, file_type, file_mapping):
+    file_paths = file_mapping.get(file_type, [])
+    print(file_paths)
+    file_contents = []
+
+    def read_from_zip(zip_ref, file_path):
+        file_name = zip_ref.namelist()[0]
+        # file_extension = "." + file_name.split(".")[-1]
+        if file_type==".pdf":
+            pdf_file = PdfReader(io.BytesIO(zip_ref.read(file_name)))
+            txt = ""
+            for page in pdf_file.pages:
+                txt += page.extract_text() + " "
+            file_contents.append(txt)
+        else:
+            with zip_ref.open(file_path) as file:
+                file_contents.append(file.read().decode())
+
+    with zipfile.ZipFile(input_zip_path, "r") as outer_zip_ref:
+        for file_path in file_paths:
+            if ".zip" in file_path:
+                nested_zip_path, nested_file_path = file_path.split("\\")
+                with outer_zip_ref.open(nested_zip_path) as nested_zip_file:
+                    nested_zip_ref = zipfile.ZipFile(nested_zip_file)
+                    read_from_zip(nested_zip_ref, nested_file_path)
+            else:
+                read_from_zip(outer_zip_ref, file_path)
+
+    return file_contents
+
+
+input_zip_path = 'cache/temp.zip'
+file_mapping = get_file_mapping(input_zip_path)
+print("============================")
+print(file_mapping)
+# file_conts=read_files(input_zip_path, ".txt", file_mapping)
+print(read_files(input_zip_path, ".pdf", file_mapping)) 
+
+# print(File_Reader().get_type_of_file_and_data("prototype/functions.py"))
+# print(File_Reader().get_type_of_file_and_data("cache/prototype/prototype/testfiles/more tests.zip\\more tests/112103079-1.patch"))
+
+""" extract_zip_recursively("testing/Assignments/Assignment 1.zip", "cache/")
+print(Folder_Structure().get_detailed_report_of_files("cache/Assignment 1")) """
+
+""" extract_zip_recursively("testing/Assignments/Assignment 2.zip", "cache/")
+print(Folder_Structure().get_detailed_report_of_files("cache/Assignment 2")) """
