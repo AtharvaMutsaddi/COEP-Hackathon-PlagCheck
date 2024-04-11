@@ -6,7 +6,6 @@ pandas
 numpy
 streamlit
 python-Levenshtein
-gensim
 python-docx
 nbformat
 PyPDF2

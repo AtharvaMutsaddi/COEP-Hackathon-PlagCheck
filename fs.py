@@ -148,8 +148,8 @@ def get_file_mapping(all_files: list):
 
         if curr_ext not in ans:
             ans[curr_ext] = []
-        else:
-            ans[curr_ext].append(item)
+            
+        ans[curr_ext].append(item)
     return ans
 
 
@@ -173,6 +173,6 @@ def get_file_mapping(all_files: list):
 # extract_zip_recursively("testing/Assignments/Assignment 2.zip", "cache/")
 # print(Folder_Structure().get_detailed_report_of_files("cache/Assignment 2"))
 
-extract_zip_recursively("uploads/testfiles/Assignment 2.zip","cache/")
-ls = get_detailed_report_of_files("cache/")
-print(get_file_mapping(ls))
+# extract_zip_recursively("uploads/testfiles/Assignment 2.zip","cache/")
+# ls = get_detailed_report_of_files("cache/")
+# print(get_file_mapping(ls))

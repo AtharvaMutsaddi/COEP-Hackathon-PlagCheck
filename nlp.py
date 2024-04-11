@@ -40,7 +40,7 @@ def simhash_simi(prog1,prog2):
     # Programs
     
     # Generate hashes for each program
-    m = 8  # Number of bytes per subsequence
+    m = 4  # Number of bytes per subsequence
     n = 128  # Number of smallest hashes to retain
     hashes1 = generate_hashes(prog1, m, n)
     hashes2 = generate_hashes(prog2, m, n)
