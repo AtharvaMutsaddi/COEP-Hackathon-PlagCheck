@@ -1,1 +1,1 @@
-this is where mongo zips go
+this is where mongo zips are downloaded

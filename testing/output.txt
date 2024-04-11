@@ -1,0 +1,36 @@
+
+
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <sys/types.h> 
+#include <linux/fs.h> 
+#include <ext2fs/ext2_fs.h> 
+
+int main(int argc, char *argv[]) 
+{ 
+    if (argc != 3) { 
+        printf("Usage: %s device-file-name inode-number\n", argv[0]); 
+        return 1; 
+    } 
+  
+    // open the device file 
+    char *devfile = argv[1]; 
+    int fd = open(devfile, O_RDONLY); 
+    if (fd < 0) { 
+        printf("Error opening device file %s\n", devfile); 
+        return 1; 
+    } 
+  
+    // get the inode number 
+    unsigned long inode_num = strtoul(argv[2], NULL, 10); 
+  
+    // read the superblock 
+    struct ext2_super_block sb; 
+    lseek(fd, 1024, SEEK_SET); 
+    ssize_t ret = read(fd, &sb, sizeof(sb)); 
+    if (ret < 0) { 
+        printf("Error reading superblock\n"); 
+        return 1; 
+    } 
+  
+    // calculate the block size
