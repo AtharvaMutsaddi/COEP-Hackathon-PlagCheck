@@ -657,10 +657,6 @@ video {
   height: 1.25rem;
 }
 
-.h-8 {
-  height: 2rem;
-}
-
 .w-10 {
   width: 2.5rem;
 }
@@ -908,10 +904,6 @@ video {
     border-width: 0px;
   }
 
-  .md\:bg-transparent {
-    background-color: transparent;
-  }
-
   .md\:bg-white {
     --tw-bg-opacity: 1;
     background-color: rgb(255 255 255 / var(--tw-bg-opacity));
@@ -919,11 +911,6 @@ video {
 
   .md\:p-0 {
     padding: 0px;
-  }
-
-  .md\:text-blue-700 {
-    --tw-text-opacity: 1;
-    color: rgb(29 78 216 / var(--tw-text-opacity));
   }
 
   .md\:hover\:bg-transparent:hover {
@@ -1007,11 +994,6 @@ video {
     .md\:dark\:bg-gray-900 {
       --tw-bg-opacity: 1;
       background-color: rgb(17 24 39 / var(--tw-bg-opacity));
-    }
-
-    .md\:dark\:text-blue-500 {
-      --tw-text-opacity: 1;
-      color: rgb(59 130 246 / var(--tw-text-opacity));
     }
 
     .md\:dark\:hover\:bg-transparent:hover {

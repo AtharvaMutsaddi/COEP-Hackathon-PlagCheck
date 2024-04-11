@@ -9,3 +9,5 @@ python-docx
 nbformat
 PyPDF2
 pymongo
+openai
+Flask
