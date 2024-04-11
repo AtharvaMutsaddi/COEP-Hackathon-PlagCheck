@@ -1,6 +1,8 @@
 import docx, nbformat, os, zipfile
 from PyPDF2 import PdfReader,PdfFileReader
 import io
+from pathlib import Path
+
 programming_file_extensions = [
     ".txt",  # Text Files
     ".py",  # Python
@@ -104,6 +106,62 @@ class File_Reader:
 
         return txt
 
+class Folder_Structure:
+    """🔵 Utilise this class analysing whether the unzipped verison of uploaded zip file has all submissions with the same structure.
+     Usage : Folder_Structure().get_detailed_report_of_files(folder_path).
+    It will return you the dict with keys as individual sumbission folder and value will be list of all relative folders inside it.
+
+    🔴 Make sure that whenever you give folder it should have seperator as / and not \ so that their is no conflict between escape characters
+    """
+
+    def get_all_immediate_directory_in_folder(self, folder_path):
+        items = os.listdir(folder_path)
+
+        directories = [
+            item for item in items if os.path.isdir(os.path.join(folder_path, item))
+        ]
+
+        return directories
+
+    def get_detailed_report_of_files(self, folder_path):
+        all_dirs = self.get_all_immediate_directory_in_folder(folder_path)
+        ans = {}
+
+        for folder_item in all_dirs:
+            helper = []
+            folder = Path(os.path.join(folder_path, folder_item)).as_posix()
+
+            for dirpath, _, filenames in os.walk(folder):
+                for filename in filenames:
+                    file_path = os.path.join(dirpath, filename)
+                    file_path = Path(file_path).as_posix()
+                    helper.append(file_path)
+
+            helper = [item.replace(folder, "") for item in helper]
+            ans[folder_item] = helper
+
+        return ans
+
+def extract_zip_recursively(zip_file, extract_to):
+    if not os.path.exists(extract_to):
+        os.makedirs(extract_to)
+
+    with zipfile.ZipFile(zip_file, "r") as zip_ref:
+        zip_ref.extractall(extract_to)
+
+        for item in zip_ref.infolist():
+            if item.is_dir():
+                continue
+
+            if item.filename.endswith(".zip"):
+                nested_zip_path = os.path.join(extract_to, item.filename)
+                nested_extract_to = os.path.join(
+                    extract_to, os.path.splitext(item.filename)[0]
+                )
+
+                extract_zip_recursively(nested_zip_path, nested_extract_to)
+
+                os.remove(nested_zip_path)
 
 def extract_files(zip_path):
     file_mapping = {}
@@ -183,3 +241,11 @@ print(read_files(input_zip_path, ".pdf", file_mapping))
 
 # print(File_Reader().get_type_of_file_and_data("prototype/functions.py"))
 # print(File_Reader().get_type_of_file_and_data("cache/prototype/prototype/testfiles/more tests.zip\\more tests/112103079-1.patch"))
+
+
+""" extract_zip_recursively("testing/Assignments/Assignment 1.zip", "cache/")
+print(Folder_Structure().get_detailed_report_of_files("cache/Assignment 1")) """
+
+""" extract_zip_recursively("testing/Assignments/Assignment 2.zip", "cache/")
+print(Folder_Structure().get_detailed_report_of_files("cache/Assignment 2")) """
+
