@@ -164,10 +164,11 @@ def get_file_mapping(all_files: list):
 
 
 # extract_zip_recursively("testcases/Assignments/Assignment 1.zip", "cache/")
-# folder_structure=Folder_Structure().get_detailed_report_of_files("cache/Assignment 2")
+# folder_structure=get_detailed_report_of_files("uploads/Assignment 1")
 # print(folder_structure)
 # print(File_Reader().get_type_of_file_and_data("./cache/Assignment 2/112103015/Documents/Project_Report.pdf"))
-# fmap=get_file_mapping(folder_structure,"./cache/Assignment 2/")
+# fmap=get_file_mapping(folder_structure)
+# print(fmap)
 # test_file_path=fmap["py"][0]
 # print(File_Reader().get_type_of_file_and_data(test_file_path))
 # extract_zip_recursively("testing/Assignments/Assignment 2.zip", "cache/")

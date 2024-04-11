@@ -27,7 +27,7 @@ class Database:
             print(f"Error in Mongo DB Connection : {err}\n")
 
     def upload_file(self, file_name: str) -> None:
-        with open("uploads/" + file_name, "rb") as f:
+        with open("../uploads/" + file_name, "rb") as f:
             data = f.read()
 
         new_file_id = self.fs.put(data, filename=file_name)
@@ -77,7 +77,7 @@ class Database:
 
         out_data = self.fs.get(helper["file_id"]).read()
 
-        with open("cache/" + helper["file_name"], "wb") as f:
+        with open("../cache/" + helper["file_name"], "wb") as f:
             f.write(out_data)
 
         print(f"{helper['file_name']} downloaded successfully")
