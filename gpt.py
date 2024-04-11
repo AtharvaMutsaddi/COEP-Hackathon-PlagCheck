@@ -6,13 +6,14 @@ def getGPTResp(prb_stat:str,option:str):
   """
   client = OpenAI(api_key="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")
   prompt=f"Give me a {option} for the following problem statement:{prb_stat}"
+  content=f"Generate a complete {option} for the given question and return ONLY the {option} without any comments or any description."
   completion = client.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[
-      {"role": "system", "content": "Generate a complete code for the given question and return ONLY the code without any comments or any description."},
+      {"role": "system", "content": content},
       {"role": "user", "content": prompt}
     ],
-    temperature=1, # to be checked...
+    # temperature=1, # to be checked...
     max_tokens=4096,
     top_p=1
 

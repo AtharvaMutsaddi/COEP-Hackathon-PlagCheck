@@ -3,5 +3,5 @@ env/
 __pycache__/
 *.pyc
 cache/
-node_modules/
 testcases/
+uploads/testfiles/

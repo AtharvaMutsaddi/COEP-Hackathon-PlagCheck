@@ -75,7 +75,7 @@ class File_Reader:
 
     def read_code_and_text_files(self, file_name: str) -> str:
         data = ""
-        with open(file_name, "r") as f:
+        with open(file_name, "r",encoding="utf-8") as f:
             data = f.read()
 
         return data.replace("\\n", "\n")
@@ -126,19 +126,27 @@ class Folder_Structure:
     def get_detailed_report_of_files(self, folder_path):
         all_dirs = self.get_all_immediate_directory_in_folder(folder_path)
         ans = {}
+        if(len(all_dirs)>0):
+            for folder_item in all_dirs:
+                helper = []
+                folder = Path(os.path.join(folder_path, folder_item)).as_posix()
 
-        for folder_item in all_dirs:
-            helper = []
-            folder = Path(os.path.join(folder_path, folder_item)).as_posix()
+                for dirpath, _, filenames in os.walk(folder):
+                    for filename in filenames:
+                        file_path = os.path.join(dirpath, filename)
+                        file_path = Path(file_path).as_posix()
+                        helper.append(file_path)
 
-            for dirpath, _, filenames in os.walk(folder):
-                for filename in filenames:
-                    file_path = os.path.join(dirpath, filename)
-                    file_path = Path(file_path).as_posix()
-                    helper.append(file_path)
-
-            helper = [item.replace(folder, "") for item in helper]
-            ans[folder_item] = helper
+                helper = [item.replace(folder, "") for item in helper]
+                ans[folder_item] = helper
+        else:
+            # handling single file
+            files = []
+            for filename in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, filename)
+                if os.path.isfile(file_path):
+                    files.append(filename)
+            ans["/"]=files
 
         return ans
 

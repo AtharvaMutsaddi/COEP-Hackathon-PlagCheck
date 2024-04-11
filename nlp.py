@@ -62,6 +62,15 @@ def get_similar_lines(lines1,lines2):
                 
     return set(similar_lines)
 
+def get_cosine_simi(text1,text2):
+    data = list()
+    data.append(text1)
+    data.append(text2)
+    embeddings = embeddings_model.embed_documents(data)
+    cs_mat = cosine_similarity(embeddings)
+    return cs_mat[0][1]
+
+
 def text_similarity(text1, text2):
     # print("Text 1: ", text1)    
     # print("Text 2: ", text2)    
