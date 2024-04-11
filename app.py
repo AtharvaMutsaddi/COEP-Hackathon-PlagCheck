@@ -24,6 +24,7 @@ def gpt():
     option = request.form['option']
     message = request.form['message']
     resp=""
+    output = ""
     # with open("./uploads/testfiles/inodenumber-1.c","r",encoding="utf-8") as f:
     #     resp=f.read()
 
@@ -35,29 +36,33 @@ def gpt():
     
     resp=resp.replace("\\n", "\n")
 
-    # TEMPORARILY USING HARDCODED FILE IN UPLOADS. THIS WILL BE REPLACED BY THE ACTUAL FILE NAME PATH UPLOADED
-    file_name = "testfiles"
-    file_path = f"uploads/{file_name}.zip"
-    extract_zip_recursively(file_path, "uploads/")
-    folder_structure = Folder_Structure(
-    ).get_detailed_report_of_files(f"uploads/{file_name}")
-    # print(folder_structure)
-    fmap = get_file_mapping(folder_structure, f"uploads/{file_name}")
+    file = request.files['file']
+
+    filename = file.filename
+    file_path = os.path.join("uploads", filename)
+    file.save(file_path)
+
+    if filename.endswith(".zip"):
+        extract_zip_recursively(file_path, "uploads/")
+
+    folder_structure = Folder_Structure().get_detailed_report_of_files("uploads")
+    fmap = get_file_mapping(folder_structure, "uploads")
+
     for ftype in fmap.keys():
         rel_file_paths = fmap[ftype]
         for fp in rel_file_paths:
             file_content = File_Reader().get_type_of_file_and_data(fp)[
                 "file_data"]
             simi = 0
-            # print(file_content)
             if (option == 'code'):
                 simi = simhash_simi(file_content, resp)
             else:
                 simi = get_cosine_simi(file_content, resp)
 
             print(f"{fp}\t{simi}")
+            output += f"{fp}\t{simi}<br>"
 
-    return render_template('home.html')
+    return output
 
 
 if __name__ == '__main__':

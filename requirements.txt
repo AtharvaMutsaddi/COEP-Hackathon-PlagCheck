@@ -6,7 +6,6 @@ pandas
 numpy
 streamlit
 python-Levenshtein
-hashlib
 gensim
 python-docx
 nbformat
