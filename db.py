@@ -88,22 +88,42 @@ class Database:
 
         print("Record added successfully!")
 
-    def get_assignment_records_from_db(
-        self, name_of_assignmnet: str, branch: str, year: str, semester: str
+    def get_unique_assignments_from_db_using_3_params(
+        self, branch: str, year: str, semester: str
     ) -> list:
         """
-        This function will fetch you all the assignmnet records from the database
+        This function will fetch you all the unique assignment names for given 3 params
         """
-        return list(
+
+        records = list(
             self.db["assignment_records"].find(
                 {
-                    "name_of_assignment": name_of_assignmnet,
                     "branch": branch,
                     "year": year,
                     "semester": semester,
                 }
             )
         )
+
+        # return list(set([item["name_of_assignment"] for item in records]))
+        return records
+
+    # def get_assignment_records_from_db_using_4_params(
+    #     self, name_of_assignmnet: str, branch: str, year: str, semester: str
+    # ) -> list:
+    #     """
+    #     This function will fetch you all the assignmnet records from the database when uou provide the given 4 params
+    #     """
+    #     return list(
+    #         self.db["assignment_records"].find(
+    #             {
+    #                 "name_of_assignment": name_of_assignmnet,
+    #                 "branch": branch,
+    #                 "year": year,
+    #                 "semester": semester,
+    #             }
+    #         )
+    #     )
 
     def download_file(self, assignment_record_id) -> None:
         """

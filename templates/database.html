@@ -1,30 +1,58 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="text-gray-600 body-font relative">
-    <div class="container px-5 py-24 mx-auto">
-        <form action="/within" method="POST" enctype="multipart/form-data"> <!-- Added form element -->
-            <div class="flex flex-col text-center w-full mb-12">
-                <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">Compare with DB
-                </h1>
-                <p class="lg:w-2/3 mx-auto leading-relaxed text-base">Compares With Database Zips</p>
+<section class="text-gray-600 body-font">
+    <div class="container px-5 mx-auto flex flex-wrap items-center">
+        <form action="/database" method="POST" enctype="multipart/form-data"
+            class="container px-5 mx-auto flex flex-wrap items-center">
+            <div class="lg:w-3/5 md:w-1/2 md:pr-16 lg:pr-0 pr-0">
+                <h1 class="title-font font-medium text-3xl text-gray-900">Compare uploaded files with Database</h1>
+                <p class="leading-relaxed mt-4">To compare previous year assignments</p>
             </div>
-            <div class="lg:w-1/2 md:w-2/3 mx-auto">
-                <div class="flex flex-wrap -m-2">
-
-                    <div class="p-2 w-full">
-                        <div class="relative">
-                            <label for="file" class="leading-7 text-sm text-gray-600">Upload zip file</label>
-                            <input type="file" id="file" name="file"
-                                class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-6 transition-colors duration-200 ease-in-out">
-                        </div>
-
-                    </div>
+            <div class="lg:w-2/6 md:w-1/2 bg-gray-100 rounded-lg p-8 flex flex-col md:ml-auto w-full mt-10 md:mt-0">
+                <h2 class="text-gray-900 text-lg font-medium title-font mb-5">Enter Details</h2>
+                <div class="relative mb-4">
+                    <label for="branch" class="leading-7 text-sm text-gray-600">Branch</label>
+                    <select id="branch" name="branch" {% if options_list is not none %} disabled {% endif %}
+                        class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <option value="Computer Engineering">Computer</option>
+                        <option value="ENTC">ENTC</option>
+                        <option value="Electrical Engineering">Electrical</option>
+                        <option value="Mechanical Engineering">Mechanical</option>
+                    </select>
                 </div>
-            </div>
-            <button type="submit"
-                class="mx-auto mt-6 text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">Submit</button>
-        </form> <!-- Added form closing tag -->
+                <div class="relative mb-4">
+                    <label for="year" class="leading-7 text-sm text-gray-600">Year</label>
+                    <select id="year" name="year" {% if options_list is not none %} disabled {% endif %}
+                        class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <option value="First Year">FY</option>
+                        <option value="Second Year">SY</option>
+                        <option value="Third Year">TY</option>
+                        <option value="Final Year">B.Tech</option>
+                    </select>
+                </div>
+                <div class="relative mb-4">
+                    <label for="sem" class="leading-7 text-sm text-gray-600">Semester</label>
+                    <select id="sem" name="sem" {% if options_list is not none %} disabled {% endif %}
+                        class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <option value="Odd Sem">Odd</option>
+                        <option value="Even Sem">Even</option>
+                    </select>
+                </div>
+                {% if options_list %}
+                <label for="name" class="leading-7 text-sm text-gray-600">Assignment Name</label>
+                <select for="name" id="name"
+                    class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                    {% for option in options_list %}
+                    <option>{{ option }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                <button type="submit" name="assignment_submit"
+                    class="text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">Submit
+                    Assignment</button>
+        </form>
+    </div>
     </div>
 </section>
 {% endblock %}

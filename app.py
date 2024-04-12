@@ -2,11 +2,25 @@ from flask import Flask, render_template, request
 from gpt import getGPTResp
 from fs import *
 from nlp import simhash_simi, get_cosine_simi
+from db import Database
 
 app = Flask(__name__)
 
 
 # temp_cache = dict()
+
+def clear_uploads_dir(path):
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            os.remove(file_path)
+            print("Removed file:", file_path)
+
+        for dir in dirs:
+            dir_path = os.path.join(root, dir)
+            clear_uploads_dir(dir_path)
+            os.rmdir(dir_path)
+            print("Removed directory:", dir_path)
 
 
 @app.route('/')
@@ -69,6 +83,7 @@ def gpt():
             print(f"{fp}\t{simi}")
             output += f"{fp}\t{simi}<br>"
 
+    clear_uploads_dir("../uploads")
     return output
 
 @app.route("/within",methods=["GET","POST"])
@@ -109,7 +124,9 @@ def within():
             superans[ftype]=ans
         
         # print(superans)
-        return superans       
+        clear_uploads_dir("../uploads")
+        return superans     
+      
 @app.route("/local",methods=["GET","POST"])
 def local():
     if request.method=="GET":
@@ -163,13 +180,27 @@ def local():
             if(len(ans)>0):
                 superans[ftype]=ans
         print(superans)
+
+        clear_uploads_dir("../uploads")
         return superans
        
 @app.route("/database", methods=["GET","POST"])
 def database():
+    post_cnt=0
+    branch=""
+    year=""
+    semester=""
     if(request.method=="POST"):
-        return render_template('database.html')
-    return render_template('database.html') 
+        if(post_cnt==1):
+            branch = request.form['branch']
+            year = request.form['year']
+            semester = request.form['sem']
+            # print(f"{branch},{year},{semester}")
+            options_list=Database().get_unique_assignments_from_db_using_3_params(branch, year, semester)
+            return render_template('database.html',options_list=options_list)
+    
+    return render_template('database.html',options_list=None)
+
 if __name__ == '__main__':
     extra_dirs = ['uploads']
     app.run(debug=True, extra_files=extra_dirs)
