@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 from gpt import getGPTResp
 from fs import *
 from nlp import simhash_simi, get_cosine_simi, get_tfidf_simi
-# from db import Database
+from db import Database
 from scrap import *
 
 app = Flask(__name__)
@@ -193,7 +193,7 @@ def local():
 @app.route("/download/<assignment_id>",methods=["GET","POST"])
 def download_file(assignment_id):
     if request.method=="GET":
-        # Database().download_file(assignment_id)
+        Database().download_file(assignment_id)
         return render_template('dbcompare.html',assignment_id=assignment_id)
     else:
         file = request.files['file']
@@ -203,9 +203,6 @@ def download_file(assignment_id):
             os.makedirs(f"../uploads/{assignment_id}")
         file_path = os.path.join(f"../uploads/{assignment_id}", filename)
         file.save(file_path) 
-
-        # if filename.endswith(".zip"):
-        #     filename=filename.split(".")[0] 
 
         extract_zip_recursively(file_path, "../uploads/") 
         extract_zip_recursively(file_path, f"../cache/{assignment_id}/")
@@ -251,12 +248,10 @@ def database():
     if(request.method=="GET"):
         return render_template('database.html')
     if(request.method=="POST"):
-        # branch = request.form['branch']
-        # year = request.form['year']
-        # semester = request.form['sem']
-        # data=Database().get_unique_assignments_from_db_using_3_params(branch, year, semester)
-        # # print(data)
-        data = data
+        branch = request.form['branch']
+        year = request.form['year']
+        semester = request.form['sem']
+        data=Database().get_unique_assignments_from_db_using_3_params(branch, year, semester)
         return render_template('assignmenttables.html',data=data)
     
     return render_template('database.html')
