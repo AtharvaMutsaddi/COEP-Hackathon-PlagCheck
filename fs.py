@@ -73,6 +73,16 @@ class File_Reader:
 
         return ans
 
+    def identify_type_of_given_file(self, file_path) -> str:
+        """
+        This function will return Code_Text for code and text files or Documents for writeups.
+        """
+        curr_ext = Path(file_path).suffix
+        if curr_ext in [".docx", ".pdf"]:
+            return "Documents"
+        elif curr_ext in programming_file_extensions or curr_ext == ".ipynb":
+            return "Code_Text"
+
     def read_code_and_text_files(self, file_name: str) -> str:
         data = ""
         with open(file_name, "r", encoding="utf-8") as f:
@@ -176,3 +186,9 @@ def get_file_mapping(all_files: list):
 # extract_zip_recursively("uploads/testfiles/Assignment 2.zip","cache/")
 # ls = get_detailed_report_of_files("cache/")
 # print(get_file_mapping(ls))
+""" extract_zip_recursively("uploads/testfiles/Assignment 2.zip", "cache/")
+ls = get_detailed_report_of_files("cache/")
+print(get_file_mapping(ls)) """
+
+# print(File_Reader().identify_type_of_given_file("cache/db.py"))
+# print(File_Reader().identify_type_of_given_file("cache/Assignment 2/Assignment 2/112103015/Documents/Project_Report.pdf"))

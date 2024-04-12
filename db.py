@@ -7,7 +7,9 @@ import datetime
 
 class Database:
     def __init__(self) -> None:
-        try:
+
+        # CONFIG FOR CLOUD MONGODB
+        """ try:
             username = "apc9214"
             password = "Anushree@2011"
             dbname = "coep_hackathon"
@@ -24,7 +26,14 @@ class Database:
             self.fs = gridfs.GridFS(self.db, collection="files")
 
         except Exception as err:
-            print(f"Error in Mongo DB Connection : {err}\n")
+            print(f"Error in Mongo DB Connection : {err}\n") """
+        
+        # CONFIG FOR LOCAL MONGODB
+        connection=MongoClient("mongodb://localhost:27017")
+        print("Connected to MongoDB Cloud\n")
+        self.db = connection["coep_hackathon"]
+        self.fs = gridfs.GridFS(self.db, collection="files")
+
 
     def upload_file(self, file_name: str) -> None:
         with open("uploads/" + file_name, "rb") as f:
@@ -82,11 +91,21 @@ class Database:
 
         print(f"{helper['file_name']} downloaded successfully")
 
+    def store_gpt_response(self, query: str, response: str) -> None:
+        """
+        This function will store the gpt response in the Database
+        """
+        record = {"query": query, "response": response}
+        self.db["cache_gpt_response"].insert_one(record)
 
-# Database().create_record_and_upload_assignment("Data Science Book Upload Assignmnet","Computer Engineering","Third Year","Even Semester","DSCI_book.pdf")
-# Database().download_file('661622a6c1c17b17a1088b64')
-# print(Database().get_all_assignment_records_from_db())
+        print("Record saved successfully!")
 
-# Database().create_record_and_upload_assignment("SE Project Assgn","Computer Engineering","Third Year","Even Sem","SE Project Website Screenshots.zip")
-# print(Database().get_all_assignment_records_from_db())
-# Database().download_file('6615ff6fc147e92f08aba162')
+    def check_and_get_cache_response_for_query(self, query: str) -> str:
+        """
+        This function will check whether cache in the database has the response for given query.If it has then it returns the response else it returns ""
+        """
+        temp = self.db["cache_gpt_response"].find_one({"query": query})
+        if temp:
+            return temp["response"]
+        else:
+            return ""
