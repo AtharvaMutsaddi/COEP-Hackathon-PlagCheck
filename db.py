@@ -88,11 +88,30 @@ class Database:
 
         print("Record added successfully!")
 
-    def get_assignment_records_from_db(
+    def get_unique_assignments_name_from_db_using_3_params(
+        self, branch: str, year: str, semester: str
+    ) -> list:
+        """
+        This function will fetch you all the unique assignment names for given 3 params
+        """
+
+        records = list(
+            self.db["assignment_records"].find(
+                {
+                    "branch": branch,
+                    "year": year,
+                    "semester": semester,
+                }
+            )
+        )
+
+        return list(set([item["name_of_assignment"] for item in records]))
+
+    def get_assignment_records_from_db_using_4_params(
         self, name_of_assignmnet: str, branch: str, year: str, semester: str
     ) -> list:
         """
-        This function will fetch you all the assignmnet records from the database
+        This function will fetch you all the assignmnet records from the database when uou provide the given 4 params
         """
         return list(
             self.db["assignment_records"].find(
@@ -139,5 +158,11 @@ class Database:
         else:
             return ""
 
+
 # Database().create_record_and_upload_assignment("Test 13","Computer Engineering","Third Year",["112103067","112103149"],"Even Sem","test_dir_12.zip")
 # print(Database().get_assignment_records_from_db("Test 13","Computer Engineering","Third Year",))
+print(
+    Database().get_unique_assignments_name_from_db_using_3_params(
+        "Computer Engineering", "Third Year", "Even Sem"
+    )
+)
