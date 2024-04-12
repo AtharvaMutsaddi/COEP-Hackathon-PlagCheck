@@ -4,6 +4,7 @@ from fs import *
 from nlp import simhash_simi, get_cosine_simi, get_tfidf_simi
 from db import Database
 from scrap import *
+from chunk_similarity import *
 
 app = Flask(__name__)
 
@@ -355,7 +356,18 @@ def uploadassg():
     
     return render_template('uploadassg.html')
     
-   
+@app.route("/comparefiles", methods=["GET"])  
+def comparefile():
+    req = request.args.to_dict()
+    file1 = req['filepath1']
+    file2 = req["filepath2"]
+    
+    file1_content = File_Reader().get_type_of_file_and_data(file1)["file_data"]
+    file2_content = File_Reader().get_type_of_file_and_data(file2)["file_data"]
+    result = get_similar_chunks(file1_content, file2_content)
+    return render_template("compare_file.html",result = result)
+    # return "Hello"
+
 
 
 if __name__ == '__main__':
