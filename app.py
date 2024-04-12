@@ -240,7 +240,8 @@ def withtext():
             for i in range(len(rel_file_paths)):
                 file_content1=File_Reader().get_type_of_file_and_data(rel_file_paths[i])["file_data"]
                 subarr=[]
-                simi=get_tfidf_simi(file_content1,text)
+                # simi=get_tfidf_simi(file_content1,text)
+                simi=simhash_simi(file_content1,text)
                 subarr.append(simi)
                 subarr.append(rel_file_paths[i])
                 superans.append(subarr)
