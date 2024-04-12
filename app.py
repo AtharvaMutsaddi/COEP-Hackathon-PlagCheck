@@ -76,22 +76,24 @@ def gpt():
                 "file_data"]
             simi = 0
             if (option == 'code'):
-                # simi = simhash_simi(file_content, resp)
-                simi = get_tfidf_simi(file_content, resp)
+                simi = simhash_simi(file_content, resp)
+                # simi = get_tfidf_simi(file_content, resp)
             else:
                 simi = get_cosine_simi(file_content, resp)
 
             print(f"{fp}\t{simi}")
             output += f"{fp}\t{simi}<br>"
 
-    clear_uploads_dir("../uploads")
+    # clear_uploads_dir("../uploads")
     return output
 
 @app.route("/within",methods=["GET","POST"])
 def within():
+    
     if request.method=="GET":
         return render_template('withinzip.html')
     else:
+        # clear_uploads_dir("../uploads")
         # print("Post")
         file = request.files['file']
         filename = file.filename
@@ -116,8 +118,8 @@ def within():
                 for j in range(i+1,len(rel_file_paths)):
                     file_content2=File_Reader().get_type_of_file_and_data(rel_file_paths[j])["file_data"]
                     subarr=[]
-                    # simi=simhash_simi(file_content1,file_content2)
-                    simi=get_tfidf_simi(file_content1,file_content2)
+                    simi=simhash_simi(file_content1,file_content2)
+                    # simi=get_tfidf_simi(file_content1,file_content2)
                     subarr.append(simi)
                     subarr.append(rel_file_paths[i])
                     subarr.append(rel_file_paths[j])
@@ -126,8 +128,6 @@ def within():
             superans[ftype]=ans
         
         superans=sort_results(superans)
-
-        clear_uploads_dir("../uploads")
         return render_template('result.html',results=superans)  
       
 @app.route("/local",methods=["GET","POST"])
@@ -175,8 +175,8 @@ def local():
                 for j in range(len(rel_file_paths2)):
                     file_content2=File_Reader().get_type_of_file_and_data(rel_file_paths2[j])["file_data"]
                     subarr=[]
-                    # simi=simhash_simi(file_content1,file_content2)
-                    simi=get_tfidf_simi(file_content1,file_content2)
+                    simi=simhash_simi(file_content1,file_content2)
+                    # simi=get_tfidf_simi(file_content1,file_content2)
                     subarr.append(simi)
                     subarr.append(rel_file_paths1[i])
                     subarr.append(rel_file_paths2[j])
@@ -186,18 +186,23 @@ def local():
 
         superans=sort_results(superans)
             
-        clear_uploads_dir("../uploads")
+        # clear_uploads_dir("../uploads")
         return render_template('result.html',results=superans)
        
+@app.route("/download/<file_id>",methods=["GET","POST"])
+def download_file(file_id):
+    return file_id
+
+
 @app.route("/database", methods=["GET","POST"])
 def database():
     if(request.method=="POST"):
         branch = request.form['branch']
         year = request.form['year']
         semester = request.form['sem']
-        assignments_list=Database().get_unique_assignments_from_db_using_3_params(branch, year, semester)
-        print(assignments_list)
-        return render_template('database.html')
+        data=Database().get_unique_assignments_from_db_using_3_params(branch, year, semester)
+        # print(data)
+        return render_template('assignmenttables.html',data=data)
     
     return render_template('database.html')
 
