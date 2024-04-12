@@ -3,6 +3,7 @@ from gpt import getGPTResp
 from fs import *
 from nlp import simhash_simi, get_cosine_simi, get_tfidf_simi
 from db import Database
+from scrap import *
 
 app = Flask(__name__)
 
@@ -247,7 +248,21 @@ def withtext():
         superans = sorted(superans)
 
         clear_uploads_dir("../uploads")
-        return render_template('textresult.html',results=superans)       
+        return render_template('textresult.html',results=superans)   
+
+
+@app.route("/webresults", methods=["GET","POST"])   
+def webresults():
+     if(request.method=="GET"):
+        return render_template('gpt.html')
+     else:
+        topic = request.topic['topic']
+        text = request.text['text']
+        res = search_topic(topic)
+        simi=get_tfidf_simi(res,text)
+
+
+
    
 
 
