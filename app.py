@@ -335,8 +335,26 @@ def webresults():
 
         return render_template('webresults.html',results=superans)   
 
+# To upload assignments to the database
+@app.route("/uploadassg", methods=["GET","POST"])   
+def uploadassg():
+    if(request.method=="GET"):
+        return render_template('uploadassg.html')
+    if(request.method=="POST"):
+        assignment_name = request.form['name']
+        branch = request.form['branch']
+        year = request.form['year']
+        div = request.form['division']
+        batch = request.form['batch']
+        semester = request.form['sem']
+        file = request.files['file']
+        filename = file.filename
 
-
+        Database().create_record_and_upload_assignment(assignment_name, branch, year, div, batch, semester, filename)
+        return render_template('database.html')
+    
+    return render_template('uploadassg.html')
+    
    
 
 

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="text-gray-600 body-font relative bg-white">
+    <div class="container px-5 py-24 mx-auto">
+        <form id="assignmentForm" action="/uploadassg" method="POST" enctype="multipart/form-data">
+            <div class="flex flex-col text-center w-full mb-12">
+                <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">Upload assignment to store in database</h1>
+                <p class="lg:w-2/3 mx-auto leading-relaxed text-base">Stores the uploaded assignment in the database for comparisons in the future</p>
+            </div>
+            <div class="lg:w-2/6 md:w-1/2 bg-gray-100 rounded-lg p-8 flex flex-col md:m-auto w-full mt-10 md:mt-0">
+                <h2 class="text-gray-900 text-lg font-medium title-font mb-5">Enter Details</h2>
+                <div class="relative mb-4">
+                    <label for="name" class="leading-7 text-sm text-gray-600">Assignment Name</label>
+                    <input id="name" name="name" required class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></input>
+                </div>
+                <div class="relative mb-4">
+                    <label for="branch" class="leading-7 text-sm text-gray-600">Branch</label>
+                    <select id="branch" name="branch" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <option value="Computer Engineering">Computer</option>
+                        <option value="ENTC">ENTC</option>
+                        <option value="Electrical Engineering">Electrical</option>
+                        <option value="Mechanical Engineering">Mechanical</option>
+                    </select>
+                </div>
+                <div class="relative mb-4">
+                    <label for="year" class="leading-7 text-sm text-gray-600">Year</label>
+                    <select id="year" name="year" onchange="updateDivisionAndBatch()" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <option value="First Year">FY</option>
+                        <option value="Second Year">SY</option>
+                        <option value="Third Year">TY</option>
+                        <option value="Final Year">B.Tech</option>
+                    </select>
+                </div>
+                <div class="relative mb-4">
+                    <label for="sem" class="leading-7 text-sm text-gray-600">Semester</label>
+                    <select id="sem" name="sem" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <option value="Odd Sem">Odd</option>
+                        <option value="Even Sem">Even</option>
+                    </select>
+                </div>
+                <div class="relative mb-4">
+                    <label for="division" class="leading-7 text-sm text-gray-600">Division</label>
+                    <select id="division" name="division" onchange="updateBatch()" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <!-- Options will be added dynamically using JavaScript -->
+                    </select>
+                </div>
+                <div class="relative mb-4">
+                    <label for="batch" class="leading-7 text-sm text-gray-600">Batch</label>
+                    <select id="batch" name="batch" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <!-- Options will be added dynamically using JavaScript -->
+                    </select>
+                </div>
+                <div class="relative mb-4">
+                    <label for="file" class="leading-7 text-sm text-gray-600">Upload zip file</label>
+                    <input type="file" id="file" name="file" required class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-6 transition-colors duration-200 ease-in-out">
+                </div>
+                <button type="submit" class="mx-auto mt-6 text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">Submit</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    function updateDivisionAndBatch() {
+        var yearSelect = document.getElementById("year");
+        var divisionSelect = document.getElementById("division");
+        var batchSelect = document.getElementById("batch");
+
+        var year = yearSelect.value;
+
+        divisionSelect.innerHTML = "";
+        batchSelect.innerHTML = "";
+
+        if (year === "First Year") {
+            for (var i = 1; i <= 12; i++) {
+                var option = document.createElement("option");
+                option.text = "Div" + i;
+                option.value = "Div" + i;
+                divisionSelect.add(option);
+            }
+        } else {
+            // For SY, TY, and B.Tech, only Div1 and Div2 options are available
+            var option1 = document.createElement("option");
+            option1.text = "Div1";
+            option1.value = "Div1";
+            divisionSelect.add(option1);
+
+            var option2 = document.createElement("option");
+            option2.text = "Div2";
+            option2.value = "Div2";
+            divisionSelect.add(option2);
+        }
+
+        updateBatch(); // Update batch options
+    }
+
+    function updateBatch() {
+        var yearSelect = document.getElementById("year");
+        var divisionSelect = document.getElementById("division");
+        var batchSelect = document.getElementById("batch");
+
+        var year = yearSelect.value;
+        var division = divisionSelect.value;
+
+        batchSelect.innerHTML = "";
+
+        if (year === "First Year") {
+            var divisionNumber = parseInt(division.substring(3)); // Extract the division number
+            var batchLetters = ['A', 'B', 'C', 'D'];
+            for (var j = 0; j < batchLetters.length; j++) {
+                var option = document.createElement("option");
+                option.text = batchLetters[j] + divisionNumber;
+                option.value = batchLetters[j] + divisionNumber;
+                batchSelect.add(option);
+            }
+        } else {
+            var batchNames;
+            if (year === "Second Year") {
+                batchNames = ['S1', 'S2', 'S3', 'S4', 'S5'];
+            } else if (year === "Third Year") {
+                batchNames = ['T1', 'T2', 'T3', 'T4', 'T5'];
+            } else if (year === "Final Year") {
+                batchNames = ['B1', 'B2', 'B3', 'B4', 'B5'];
+            }
+
+            for (var k = 0; k < batchNames.length; k++) {
+                var option = document.createElement("option");
+                option.text = batchNames[k];
+                option.value = batchNames[k];
+                batchSelect.add(option);
+            }
+        }
+    }
+
+    // Call the function once to set initial values
+    updateDivisionAndBatch();
+</script>
+{% endblock %}
