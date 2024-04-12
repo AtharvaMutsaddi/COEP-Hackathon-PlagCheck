@@ -139,5 +139,8 @@ class Database:
         else:
             return ""
 
-# Database().create_record_and_upload_assignment("Test 13","Computer Engineering","Third Year",["112103067","112103149"],"Even Sem","test_dir_12.zip")
+# # Database().create_record_and_upload_assignment("A1","Computer Engineering","Third Year",["112103067","112103030"],"Even Sem","Assignment 1.zip")
+# Database().create_record_and_upload_assignment("A2","Electrical Engineering","Second Year",["112104067","112101030","112105017"],"Even Sem","test_dir_4.zip")
+# Database().create_record_and_upload_assignment("A3","Mechanical Engineering","Second Year",["112110067","112110030","112110017"],"Odd Sem","test_dir_2.zip")
+# Database().create_record_and_upload_assignment("A4","Computer Engineering","Second Year",["112103017","112103033","112103016", "112103127"],"Even Sem","test_dir_3.zip")
 # print(Database().get_assignment_records_from_db("Test 13","Computer Engineering","Third Year",))

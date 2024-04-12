@@ -167,9 +167,9 @@ def local():
        
 @app.route("/database", methods=["GET","POST"])
 def database():
-    if(request.method=="GET"):
+    if(request.method=="POST"):
         return render_template('database.html')
-    return {}
+    return render_template('database.html') 
 if __name__ == '__main__':
     extra_dirs = ['uploads']
     app.run(debug=True, extra_files=extra_dirs)
