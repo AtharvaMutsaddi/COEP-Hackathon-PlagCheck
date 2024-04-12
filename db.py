@@ -47,7 +47,8 @@ class Database:
         name_of_assignmnet: str,
         branch: str,
         year: str,
-        list_of_students_mis: list,
+        div: str,
+        batch: str,
         semester: str,
         file_name: str,
     ) -> None:
@@ -62,23 +63,23 @@ class Database:
                     "branch": branch,
                     "year": year,
                     "semester": semester,
+                    "div": div,
+                    "batch": batch,
                 }
             )
         )
 
-        for new_mis in list_of_students_mis:
-            for record in existing_records:
-                for old_mis in record["list_of_students_mis"]:
-                    if new_mis == old_mis:
-                        print("This record cannot be added")
-                        return
+        if len(existing_records) != 0:
+            print("Cannot add this record!")
+            return
 
         new_record = {
             "name_of_assignment": name_of_assignmnet,
             "branch": branch,
             "year": year,
             "semester": semester,
-            "list_of_students_mis": list_of_students_mis,
+            "div": div,
+            "batch": batch,
             "year_of_submission": datetime.datetime.now().year,
             "file_id": self.upload_file(file_name),
             "file_name": file_name,
@@ -88,7 +89,7 @@ class Database:
 
         print("Record added successfully!")
 
-    def get_unique_assignments_name_from_db_using_3_params(
+    def get_unique_assignments_from_db_using_3_params(
         self, branch: str, year: str, semester: str
     ) -> list:
         """
@@ -105,24 +106,25 @@ class Database:
             )
         )
 
-        return list(set([item["name_of_assignment"] for item in records]))
+        # return list(set([item["name_of_assignment"] for item in records]))
+        return records
 
-    def get_assignment_records_from_db_using_4_params(
-        self, name_of_assignmnet: str, branch: str, year: str, semester: str
-    ) -> list:
-        """
-        This function will fetch you all the assignmnet records from the database when uou provide the given 4 params
-        """
-        return list(
-            self.db["assignment_records"].find(
-                {
-                    "name_of_assignment": name_of_assignmnet,
-                    "branch": branch,
-                    "year": year,
-                    "semester": semester,
-                }
-            )
-        )
+    # def get_assignment_records_from_db_using_4_params(
+    #     self, name_of_assignmnet: str, branch: str, year: str, semester: str
+    # ) -> list:
+    #     """
+    #     This function will fetch you all the assignmnet records from the database when uou provide the given 4 params
+    #     """
+    #     return list(
+    #         self.db["assignment_records"].find(
+    #             {
+    #                 "name_of_assignment": name_of_assignmnet,
+    #                 "branch": branch,
+    #                 "year": year,
+    #                 "semester": semester,
+    #             }
+    #         )
+    #     )
 
     def download_file(self, assignment_record_id) -> None:
         """
@@ -134,7 +136,7 @@ class Database:
 
         out_data = self.fs.get(helper["file_id"]).read()
 
-        with open("../cache/" + helper["file_name"], "wb") as f:
+        with open(f"../cache/{assignment_record_id}.zip", "wb") as f:
             f.write(out_data)
 
         print(f"{helper['file_name']} downloaded successfully")
@@ -159,10 +161,10 @@ class Database:
             return ""
 
 
-# Database().create_record_and_upload_assignment("Test 13","Computer Engineering","Third Year",["112103067","112103149"],"Even Sem","test_dir_12.zip")
+# # Database().create_record_and_upload_assignment("A1","Computer Engineering","Third Year",["112103067","112103030"],"Even Sem","Assignment 1.zip")
+# Database().create_record_and_upload_assignment("A2","Electrical Engineering","Second Year",["112104067","112101030","112105017"],"Even Sem","test_dir_4.zip")
+# Database().create_record_and_upload_assignment("A3","Mechanical Engineering","Second Year",["112110067","112110030","112110017"],"Odd Sem","test_dir_2.zip")
+# Database().create_record_and_upload_assignment("A4","Computer Engineering","Second Year",["112103017","112103033","112103016", "112103127"],"Even Sem","test_dir_3.zip")
 # print(Database().get_assignment_records_from_db("Test 13","Computer Engineering","Third Year",))
-print(
-    Database().get_unique_assignments_name_from_db_using_3_params(
-        "Computer Engineering", "Third Year", "Even Sem"
-    )
-)
+
+Database().download_file("6619317674327441fc2ff77e")

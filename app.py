@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 from gpt import getGPTResp
 from fs import *
 from nlp import simhash_simi, get_cosine_simi, get_tfidf_simi
+from db import Database
 
 app = Flask(__name__)
 
@@ -75,22 +76,24 @@ def gpt():
                 "file_data"]
             simi = 0
             if (option == 'code'):
-                # simi = simhash_simi(file_content, resp)
-                simi = get_tfidf_simi(file_content, resp)
+                simi = simhash_simi(file_content, resp)
+                # simi = get_tfidf_simi(file_content, resp)
             else:
                 simi = get_cosine_simi(file_content, resp)
 
             print(f"{fp}\t{simi}")
             output += f"{fp}\t{simi}<br>"
 
-    clear_uploads_dir("../uploads")
+    # clear_uploads_dir("../uploads")
     return output
 
 @app.route("/within",methods=["GET","POST"])
 def within():
+    
     if request.method=="GET":
         return render_template('withinzip.html')
     else:
+        # clear_uploads_dir("../uploads")
         # print("Post")
         file = request.files['file']
         filename = file.filename
@@ -115,8 +118,8 @@ def within():
                 for j in range(i+1,len(rel_file_paths)):
                     file_content2=File_Reader().get_type_of_file_and_data(rel_file_paths[j])["file_data"]
                     subarr=[]
-                    # simi=simhash_simi(file_content1,file_content2)
-                    simi=get_tfidf_simi(file_content1,file_content2)
+                    simi=simhash_simi(file_content1,file_content2)
+                    # simi=get_tfidf_simi(file_content1,file_content2)
                     subarr.append(simi)
                     subarr.append(rel_file_paths[i])
                     subarr.append(rel_file_paths[j])
@@ -125,8 +128,6 @@ def within():
             superans[ftype]=ans
         
         superans=sort_results(superans)
-
-        clear_uploads_dir("../uploads")
         return render_template('result.html',results=superans)  
       
 @app.route("/local",methods=["GET","POST"])
@@ -174,8 +175,8 @@ def local():
                 for j in range(len(rel_file_paths2)):
                     file_content2=File_Reader().get_type_of_file_and_data(rel_file_paths2[j])["file_data"]
                     subarr=[]
-                    # simi=simhash_simi(file_content1,file_content2)
-                    simi=get_tfidf_simi(file_content1,file_content2)
+                    simi=simhash_simi(file_content1,file_content2)
+                    # simi=get_tfidf_simi(file_content1,file_content2)
                     subarr.append(simi)
                     subarr.append(rel_file_paths1[i])
                     subarr.append(rel_file_paths2[j])
@@ -185,15 +186,71 @@ def local():
 
         superans=sort_results(superans)
             
-        clear_uploads_dir("../uploads")
+        # clear_uploads_dir("../uploads")
         return render_template('result.html',results=superans)
        
+@app.route("/download/<assignment_id>",methods=["GET","POST"])
+def download_file(assignment_id):
+    if request.method=="GET":
+        Database().download_file(assignment_id)
+        return render_template('dbcompare.html',assignment_id=assignment_id)
+    else:
+        file = request.files['file']
+        filename1 = file.filename 
+        
+
+
 @app.route("/database", methods=["GET","POST"])
 def database():
     if(request.method=="GET"):
         return render_template('database.html')
-    return {}     
+    if(request.method=="POST"):
+        branch = request.form['branch']
+        year = request.form['year']
+        semester = request.form['sem']
+        data=Database().get_unique_assignments_from_db_using_3_params(branch, year, semester)
+        # print(data)
+        return render_template('assignmenttables.html',data=data)
+    
+    return render_template('database.html')
+
+@app.route("/withtext", methods=["GET","POST"])
+def withtext():
+    if(request.method=="GET"):
+        return render_template('withtext.html')
+    else:
+        text = request.form['text']
+        file = request.files['file']
+        filename = file.filename
+    
+        file_path = os.path.join("../uploads", filename)
+        file.save(file_path)
+
+        if filename.endswith(".zip"):
+            filename=filename.split(".")[0]
+            
+        extract_zip_recursively(file_path, "../uploads/")
+
+        folder_structure = get_detailed_report_of_files(f"../uploads/{filename}")
+        fmap = get_file_mapping(folder_structure)
+        superans=[]
+        for ftype in fmap.keys():
+            rel_file_paths = fmap[ftype]
+            for i in range(len(rel_file_paths)):
+                file_content1=File_Reader().get_type_of_file_and_data(rel_file_paths[i])["file_data"]
+                subarr=[]
+                simi=get_tfidf_simi(file_content1,text)
+                subarr.append(simi)
+                subarr.append(rel_file_paths[i])
+                superans.append(subarr)
+            
+        superans = sorted(superans)
+
+        clear_uploads_dir("../uploads")
+        return render_template('textresult.html',results=superans)       
    
+
+
 if __name__ == '__main__':
     extra_dirs = ['uploads']
     app.run(debug=True, extra_files=extra_dirs)

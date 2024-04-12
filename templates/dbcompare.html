@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="text-gray-600 body-font relative bg-white mt-16">
+<section class="text-gray-600 body-font relative">
     <div class="container px-5 py-24 mx-auto">
-        <form action="/within" method="POST" enctype="multipart/form-data"> 
+        <form action="/download/{{ assignment_id }}" method="POST" enctype="multipart/form-data"> <!-- Added form element -->
             <div class="flex flex-col text-center w-full mb-12">
-                <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">Compare Within Itself
+                <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">Compare With Data Base File
                 </h1>
-                <p class="lg:w-2/3 mx-auto leading-relaxed text-base">Compares Within The Input Zip</p>
+                <p class="lg:w-2/3 mx-auto leading-relaxed text-base">Compares With The Assignment You just downloaded: {{ assignment_id }}</p>
             </div>
             <div class="lg:w-1/2 md:w-2/3 mx-auto">
                 <div class="flex flex-wrap -m-2">
@@ -22,10 +22,8 @@
                     </div>
                 </div>
             </div>
-            <div class="flex justify-center">
-                <button type="submit"
-                    class="mx-auto mt-6 text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">Submit</button>
-            </div>
+            <button type="submit"
+                class="mx-auto mt-6 text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">Submit</button>
         </form> <!-- Added form closing tag -->
     </div>
 </section>

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Assignment Results</h1>
+{% if data %}
+<div class="overflow-x-auto">
+    <table class="table-auto w-full border-collapse border border-gray-300">
+        <thead>
+            <tr class="bg-gray-200">
+                <th class="px-4 py-2">ID</th>
+                <th class="px-4 py-2">Name of Assignment</th>
+                <th class="px-4 py-2">Branch</th>
+                <th class="px-4 py-2">Year</th>
+                <th class="px-4 py-2">Semester</th>
+                <th class="px-4 py-2">List of Students MIS</th>
+                <th class="px-4 py-2">Year of Submission</th>
+                <th class="px-4 py-2">File Name</th>
+                <th class="px-4 py-2">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in data %}
+            <tr>
+                <td class="border px-4 py-2">{{ result['_id'] }}</td>
+                <td class="border px-4 py-2">{{ result['name_of_assignment'] }}</td>
+                <td class="border px-4 py-2">{{ result['branch'] }}</td>
+                <td class="border px-4 py-2">{{ result['year'] }}</td>
+                <td class="border px-4 py-2">{{ result['semester'] }}</td>
+                <td class="border px-4 py-2">{{ result['list_of_students_mis'] }}</td>
+                <td class="border px-4 py-2">{{ result['year_of_submission'] }}</td>
+                <td class="border px-4 py-2">{{ result['file_name'] }}</td>
+                <td class="border px-4 py-2">
+                    <a href="/download/{{ result['_id'] }}" class="text-blue-500 hover:underline">Download</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-gray-500">No results found.</p>
+{% endif %}
+{% endblock %}
