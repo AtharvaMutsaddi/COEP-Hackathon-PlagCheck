@@ -1,10 +1,8 @@
 scikit-learn
 sentence-transformers
 simhash
-langchain
 pandas
 numpy
-streamlit
 python-Levenshtein
 python-docx
 nbformat
@@ -12,3 +10,4 @@ PyPDF2
 pymongo
 openai
 Flask
+googlesearch-python
