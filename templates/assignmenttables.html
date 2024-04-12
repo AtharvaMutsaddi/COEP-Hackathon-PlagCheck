@@ -12,7 +12,7 @@
                 <th class="px-4 py-2">Branch</th>
                 <th class="px-4 py-2">Year</th>
                 <th class="px-4 py-2">Semester</th>
-                <th class="px-4 py-2">List of Students MIS</th>
+                <th class="px-4 py-2">Div and Batch</th>
                 <th class="px-4 py-2">Year of Submission</th>
                 <th class="px-4 py-2">File Name</th>
                 <th class="px-4 py-2">Action</th>
@@ -20,13 +20,13 @@
         </thead>
         <tbody>
             {% for result in data %}
-            <tr>
+            <tr class="bg-gray-200">
                 <td class="border px-4 py-2">{{ result['_id'] }}</td>
                 <td class="border px-4 py-2">{{ result['name_of_assignment'] }}</td>
                 <td class="border px-4 py-2">{{ result['branch'] }}</td>
                 <td class="border px-4 py-2">{{ result['year'] }}</td>
                 <td class="border px-4 py-2">{{ result['semester'] }}</td>
-                <td class="border px-4 py-2">{{ result['list_of_students_mis'] }}</td>
+                <td class="border px-4 py-2">{{ result['div'] }} , {{ result['batch'] }}</td>
                 <td class="border px-4 py-2">{{ result['year_of_submission'] }}</td>
                 <td class="border px-4 py-2">{{ result['file_name'] }}</td>
                 <td class="border px-4 py-2">

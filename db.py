@@ -161,10 +161,11 @@ class Database:
             return ""
 
 
-# # Database().create_record_and_upload_assignment("A1","Computer Engineering","Third Year",["112103067","112103030"],"Even Sem","Assignment 1.zip")
-# Database().create_record_and_upload_assignment("A2","Electrical Engineering","Second Year",["112104067","112101030","112105017"],"Even Sem","test_dir_4.zip")
-# Database().create_record_and_upload_assignment("A3","Mechanical Engineering","Second Year",["112110067","112110030","112110017"],"Odd Sem","test_dir_2.zip")
-# Database().create_record_and_upload_assignment("A4","Computer Engineering","Second Year",["112103017","112103033","112103016", "112103127"],"Even Sem","test_dir_3.zip")
+Database().create_record_and_upload_assignment("A1","Computer Engineering","Third Year","Div1","T1","Even Sem","Assignment 1.zip")
+Database().create_record_and_upload_assignment("A2","Electrical Engineering","Second Year","Div1","T2","Even Sem","test_dir_2.zip")
+Database().create_record_and_upload_assignment("A3","Mechanical Engineering","Second Year","Div2","T4","Odd Sem","test_dir_3.zip")
+Database().create_record_and_upload_assignment("A4","Computer Engineering","Third Year","Div1","T1","Even Sem","test_dir_4.zip")
+Database().create_record_and_upload_assignment("A5","Computer Engineering","Second Year","Div2","T2","Even Sem","test_dir_5.zip")
+Database().create_record_and_upload_assignment("A6","Computer Engineering","Third Year","Div2","T2","Even Sem","test_dir_6.zip")
 # print(Database().get_assignment_records_from_db("Test 13","Computer Engineering","Third Year",))
 
-Database().download_file("6619317674327441fc2ff77e")

@@ -199,3 +199,4 @@ print(get_file_mapping(ls)) """
 
 # print(File_Reader().identify_type_of_given_file("cache/db.py"))
 # print(File_Reader().identify_type_of_given_file("cache/Assignment 2/Assignment 2/112103015/Documents/Project_Report.pdf"))
+# extract_zip_recursively("../cache/6618e96909265674e7dbd449.zip", "../cache/6618e96909265674e7dbd449/")
