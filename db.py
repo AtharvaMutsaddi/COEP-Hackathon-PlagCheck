@@ -9,7 +9,7 @@ class Database:
     def __init__(self) -> None:
 
         # CONFIG FOR CLOUD MONGODB
-        """ try:
+        """try:
             username = "apc9214"
             password = "Anushree@2011"
             dbname = "coep_hackathon"
@@ -26,14 +26,13 @@ class Database:
             self.fs = gridfs.GridFS(self.db, collection="files")
 
         except Exception as err:
-            print(f"Error in Mongo DB Connection : {err}\n") """
-        
+            print(f"Error in Mongo DB Connection : {err}\n")"""
+
         # CONFIG FOR LOCAL MONGODB
-        connection=MongoClient("mongodb://localhost:27017")
+        connection = MongoClient("mongodb://localhost:27017")
         print("Connected to MongoDB Cloud\n")
         self.db = connection["coep_hackathon"]
         self.fs = gridfs.GridFS(self.db, collection="files")
-
 
     def upload_file(self, file_name: str) -> None:
         with open("../uploads/" + file_name, "rb") as f:
@@ -48,17 +47,38 @@ class Database:
         name_of_assignmnet: str,
         branch: str,
         year: str,
+        list_of_students_mis: list,
         semester: str,
         file_name: str,
     ) -> None:
         """
         Use this function to save the assignmnet record with given propeties in db.It will do things create a entry for assignment record and also upload your file to mongodb. Make sure that file you want to upload is in the uploads directory. Just provide the name of file that is in the uploads directory
         """
+
+        existing_records = list(
+            self.db["assignment_records"].find(
+                {
+                    "name_of_assignment": name_of_assignmnet,
+                    "branch": branch,
+                    "year": year,
+                    "semester": semester,
+                }
+            )
+        )
+
+        for new_mis in list_of_students_mis:
+            for record in existing_records:
+                for old_mis in record["list_of_students_mis"]:
+                    if new_mis == old_mis:
+                        print("This record cannot be added")
+                        return
+
         new_record = {
             "name_of_assignment": name_of_assignmnet,
             "branch": branch,
             "year": year,
             "semester": semester,
+            "list_of_students_mis": list_of_students_mis,
             "year_of_submission": datetime.datetime.now().year,
             "file_id": self.upload_file(file_name),
             "file_name": file_name,
@@ -66,15 +86,43 @@ class Database:
 
         self.db["assignment_records"].insert_one(new_record)
 
-    def get_all_assignment_records_from_db(self):
+        print("Record added successfully!")
+
+    def get_unique_assignments_name_from_db_using_3_params(
+        self, branch: str, year: str, semester: str
+    ) -> list:
         """
-        This function will fetch you all the assignmnet records from the database
+        This function will fetch you all the unique assignment names for given 3 params
         """
-        ans = []
-        response = self.db["assignment_records"].find({})
-        for record in response:
-            ans.append(record)
-        return ans
+
+        records = list(
+            self.db["assignment_records"].find(
+                {
+                    "branch": branch,
+                    "year": year,
+                    "semester": semester,
+                }
+            )
+        )
+
+        return list(set([item["name_of_assignment"] for item in records]))
+
+    def get_assignment_records_from_db_using_4_params(
+        self, name_of_assignmnet: str, branch: str, year: str, semester: str
+    ) -> list:
+        """
+        This function will fetch you all the assignmnet records from the database when uou provide the given 4 params
+        """
+        return list(
+            self.db["assignment_records"].find(
+                {
+                    "name_of_assignment": name_of_assignmnet,
+                    "branch": branch,
+                    "year": year,
+                    "semester": semester,
+                }
+            )
+        )
 
     def download_file(self, assignment_record_id) -> None:
         """
@@ -109,3 +157,12 @@ class Database:
             return temp["response"]
         else:
             return ""
+
+
+# Database().create_record_and_upload_assignment("Test 13","Computer Engineering","Third Year",["112103067","112103149"],"Even Sem","test_dir_12.zip")
+# print(Database().get_assignment_records_from_db("Test 13","Computer Engineering","Third Year",))
+print(
+    Database().get_unique_assignments_name_from_db_using_3_params(
+        "Computer Engineering", "Third Year", "Even Sem"
+    )
+)
