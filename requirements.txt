@@ -11,3 +11,4 @@ pymongo
 openai
 Flask
 googlesearch-python
+langchain

@@ -162,6 +162,12 @@ def get_file_mapping(all_files: list):
         ans[curr_ext].append(item)
     return ans
 
+def sort_results(results: dict):
+    sorted_results = {}
+    for key in results.keys():
+        sorted_results[key] = sorted([x for x in results[key] if x[1] != x[2]], key=lambda x: x[0], reverse=True)
+    return sorted_results
+
 
 # input_zip_path = 'cache/temp.zip'
 # file_mapping = get_file_mapping(input_zip_path)

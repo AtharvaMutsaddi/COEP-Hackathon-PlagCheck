@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="text-gray-600 body-font relative">
+    <div class="container px-5 py-24 mx-auto">
+        <h1 class="text-4xl font-bold text-center text-gray-900 py-3">Similarity</h1>
+        {%for filetype, results in results.items() %}
+        <div class="flex flex-col  w-full mb-12">
+            <p class="py-5 sm:text-3xl text-2xl leading-relaxed text-base">File Type : {{filetype}}</p>
+        </div>
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead class="text-xl text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">
+                            File 1
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            File 2
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Similarity
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}                    
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            {{result[1]}}
+                        </th>
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            {{result[2]}}
+                        </th>
+                        <td class="px-6 py-4">
+                            {{result[0]}}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+            {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+

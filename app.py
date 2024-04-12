@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 from gpt import getGPTResp
 from fs import *
-from nlp import simhash_simi, get_cosine_simi
+from nlp import simhash_simi, get_cosine_simi, get_tfidf_simi
 from db import Database
 
 app = Flask(__name__)
@@ -76,7 +76,8 @@ def gpt():
                 "file_data"]
             simi = 0
             if (option == 'code'):
-                simi = simhash_simi(file_content, resp)
+                # simi = simhash_simi(file_content, resp)
+                simi = get_tfidf_simi(file_content, resp)
             else:
                 simi = get_cosine_simi(file_content, resp)
 
@@ -115,7 +116,8 @@ def within():
                 for j in range(i+1,len(rel_file_paths)):
                     file_content2=File_Reader().get_type_of_file_and_data(rel_file_paths[j])["file_data"]
                     subarr=[]
-                    simi=simhash_simi(file_content1,file_content2)
+                    # simi=simhash_simi(file_content1,file_content2)
+                    simi=get_tfidf_simi(file_content1,file_content2)
                     subarr.append(simi)
                     subarr.append(rel_file_paths[i])
                     subarr.append(rel_file_paths[j])
@@ -123,9 +125,10 @@ def within():
             
             superans[ftype]=ans
         
-        # print(superans)
+        superans=sort_results(superans)
+
         clear_uploads_dir("../uploads")
-        return superans     
+        return render_template('result.html',results=superans)  
       
 @app.route("/local",methods=["GET","POST"])
 def local():
@@ -172,34 +175,31 @@ def local():
                 for j in range(len(rel_file_paths2)):
                     file_content2=File_Reader().get_type_of_file_and_data(rel_file_paths2[j])["file_data"]
                     subarr=[]
-                    simi=simhash_simi(file_content1,file_content2)
+                    # simi=simhash_simi(file_content1,file_content2)
+                    simi=get_tfidf_simi(file_content1,file_content2)
                     subarr.append(simi)
                     subarr.append(rel_file_paths1[i])
                     subarr.append(rel_file_paths2[j])
                     ans.append(subarr)
             if(len(ans)>0):
                 superans[ftype]=ans
-        print(superans)
 
+        superans=sort_results(superans)
+            
         clear_uploads_dir("../uploads")
-        return superans
+        return render_template('result.html',results=superans)
        
 @app.route("/database", methods=["GET","POST"])
 def database():
-    post_cnt=0
-    branch=""
-    year=""
-    semester=""
     if(request.method=="POST"):
-        if(post_cnt==1):
-            branch = request.form['branch']
-            year = request.form['year']
-            semester = request.form['sem']
-            # print(f"{branch},{year},{semester}")
-            options_list=Database().get_unique_assignments_from_db_using_3_params(branch, year, semester)
-            return render_template('database.html',options_list=options_list)
+        branch = request.form['branch']
+        year = request.form['year']
+        semester = request.form['sem']
+        assignments_list=Database().get_unique_assignments_from_db_using_3_params(branch, year, semester)
+        print(assignments_list)
+        return render_template('database.html')
     
-    return render_template('database.html',options_list=None)
+    return render_template('database.html')
 
 if __name__ == '__main__':
     extra_dirs = ['uploads']

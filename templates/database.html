@@ -13,7 +13,7 @@
                 <h2 class="text-gray-900 text-lg font-medium title-font mb-5">Enter Details</h2>
                 <div class="relative mb-4">
                     <label for="branch" class="leading-7 text-sm text-gray-600">Branch</label>
-                    <select id="branch" name="branch" {% if options_list is not none %} disabled {% endif %}
+                    <select id="branch" name="branch"
                         class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                         <option value="Computer Engineering">Computer</option>
                         <option value="ENTC">ENTC</option>
@@ -23,7 +23,7 @@
                 </div>
                 <div class="relative mb-4">
                     <label for="year" class="leading-7 text-sm text-gray-600">Year</label>
-                    <select id="year" name="year" {% if options_list is not none %} disabled {% endif %}
+                    <select id="year" name="year"
                         class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                         <option value="First Year">FY</option>
                         <option value="Second Year">SY</option>
@@ -33,21 +33,12 @@
                 </div>
                 <div class="relative mb-4">
                     <label for="sem" class="leading-7 text-sm text-gray-600">Semester</label>
-                    <select id="sem" name="sem" {% if options_list is not none %} disabled {% endif %}
+                    <select id="sem" name="sem"
                         class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                         <option value="Odd Sem">Odd</option>
                         <option value="Even Sem">Even</option>
                     </select>
                 </div>
-                {% if options_list %}
-                <label for="name" class="leading-7 text-sm text-gray-600">Assignment Name</label>
-                <select for="name" id="name"
-                    class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                    {% for option in options_list %}
-                    <option>{{ option }}</option>
-                    {% endfor %}
-                </select>
-                {% endif %}
                 <button type="submit" name="assignment_submit"
                     class="text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">Submit
                     Assignment</button>
