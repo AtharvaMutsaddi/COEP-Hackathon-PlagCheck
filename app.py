@@ -8,6 +8,19 @@ app = Flask(__name__)
 
 # temp_cache = dict()
 
+def clear_uploads_dir(path):
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            os.remove(file_path)
+            print("Removed file:", file_path)
+
+        for dir in dirs:
+            dir_path = os.path.join(root, dir)
+            clear_uploads_dir(dir_path)
+            os.rmdir(dir_path)
+            print("Removed directory:", dir_path)
+
 
 @app.route('/')
 def home():
@@ -69,6 +82,7 @@ def gpt():
             print(f"{fp}\t{simi}")
             output += f"{fp}\t{simi}<br>"
 
+    clear_uploads_dir("../uploads")
     return output
 
 @app.route("/within",methods=["GET","POST"])
@@ -109,7 +123,9 @@ def within():
             superans[ftype]=ans
         
         # print(superans)
-        return superans       
+        clear_uploads_dir("../uploads")
+        return superans     
+      
 @app.route("/local",methods=["GET","POST"])
 def local():
     if request.method=="GET":
@@ -163,6 +179,8 @@ def local():
             if(len(ans)>0):
                 superans[ftype]=ans
         print(superans)
+
+        clear_uploads_dir("../uploads")
         return superans
        
 @app.route("/database", methods=["GET","POST"])
