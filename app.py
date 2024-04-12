@@ -36,6 +36,7 @@ def gptpage():
 
 @app.route('/gpt', methods=['POST'])
 def gpt():
+    table_rows = []
     option = request.form['option']
     message = request.form['message']
     message = message.lower().strip()
@@ -83,11 +84,12 @@ def gpt():
             else:
                 simi = get_cosine_simi(file_content, resp)
 
-            print(f"{fp}\t{simi}")
-            output += f"{fp}\t{simi}<br>"
+            # print(f"{fp}\t{simi}")
+            # output += f"{fp}\t{simi}<br>"
+            table_rows.append({'file_path': fp, 'similarity_score': simi})
 
     # clear_uploads_dir("../uploads")
-    return output
+    return render_template("table.html", table_rows=table_rows)
 
 @app.route("/within",methods=["GET","POST"])
 def within():
