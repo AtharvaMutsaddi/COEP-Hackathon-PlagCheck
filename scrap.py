@@ -17,7 +17,7 @@ def search_topic(topic):
         
         for item in items:
             url = item['link']
-            results.append(extract_content(url))
+            results.append([extract_content(url),url])
             
     except Exception as e:
         print("An error occurred:", e)
@@ -32,7 +32,7 @@ def extract_content(url):
         paragraphs = soup.find_all('p')
         content = '\n'.join([p.get_text() for p in paragraphs])
         print("Content extracted from:", url)
-        return content  # Print the first 300 characters of the content
+        return content,url  # Print the first 300 characters of the content
         
     except Exception as e:
         print("An error occurred while extracting content from", url, ":", e)
