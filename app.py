@@ -164,7 +164,12 @@ def local():
                 superans[ftype]=ans
         print(superans)
         return superans
-                
+       
+@app.route("/database", methods=["GET","POST"])
+def database():
+    if(request.method=="GET"):
+        return render_template('database.html')
+    return {}
 if __name__ == '__main__':
     extra_dirs = ['uploads']
     app.run(debug=True, extra_files=extra_dirs)
