@@ -1,6 +1,7 @@
 from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
 inference_api_key="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"
 
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 import os
@@ -38,7 +39,8 @@ def jaccard_similarity(set1, set2):
 
 def simhash_simi(prog1,prog2):
     # Programs
-    
+    prog1 = preprocess_text(prog1)
+    prog2 = preprocess_text(prog2)
     # Generate hashes for each program
     m = 4  # Number of bytes per subsequence
     n = 128  # Number of smallest hashes to retain
@@ -48,6 +50,16 @@ def simhash_simi(prog1,prog2):
     # Calculate Jaccard similarity of the sets of retained hashes
     similarity = jaccard_similarity(set(hashes1), set(hashes2))
     return similarity
+
+def get_tfidf_simi(text1, text2):
+    text1 = preprocess_text(text1)
+    text2 = preprocess_text(text2)
+    tfidf_vectorizer = TfidfVectorizer()
+    tfidf_matrix = tfidf_vectorizer.fit_transform([text1, text2])
+    file1 = tfidf_vectorizer.transform([text1]).toarray()[0]
+    file2 = tfidf_vectorizer.transform([text2]).toarray()[0]
+    sim = cosine_similarity([file1], [file2])[0][0]
+    return sim
 
 
 def get_similar_lines(lines1,lines2):
