@@ -108,8 +108,10 @@ def within():
             
             superans[ftype]=ans
         
-        # print(superans)
-        return superans       
+        superans=sort_results(superans)
+
+        return render_template('result.html',results=superans)  
+         
 @app.route("/local",methods=["GET","POST"])
 def local():
     if request.method=="GET":
@@ -162,14 +164,17 @@ def local():
                     ans.append(subarr)
             if(len(ans)>0):
                 superans[ftype]=ans
-        print(superans)
-        return superans
-       
+
+        superans=sort_results(superans)
+            
+        return render_template('result.html',results=superans)
+    
 @app.route("/database", methods=["GET","POST"])
 def database():
     if(request.method=="GET"):
         return render_template('database.html')
-    return {}
+    return {}     
+   
 if __name__ == '__main__':
     extra_dirs = ['uploads']
     app.run(debug=True, extra_files=extra_dirs)
