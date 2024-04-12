@@ -38,6 +38,7 @@ def gptpage():
 def gpt():
     option = request.form['option']
     message = request.form['message']
+    message = message.lower().strip()
     resp=""
     output = ""
     # test_ipynb_fp="./uploads/testfiles-old/Project_Report.pdf"
