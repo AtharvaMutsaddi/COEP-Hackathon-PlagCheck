@@ -189,9 +189,15 @@ def local():
         # clear_uploads_dir("../uploads")
         return render_template('result.html',results=superans)
        
-@app.route("/download/<file_id>",methods=["GET","POST"])
-def download_file(file_id):
-    return file_id
+@app.route("/download/<assignment_id>",methods=["GET","POST"])
+def download_file(assignment_id):
+    if request.method=="GET":
+        Database().download_file(assignment_id)
+        return render_template('dbcompare.html',assignment_id=assignment_id)
+    else:
+        file = request.files['file']
+        filename1 = file.filename 
+        
 
 
 @app.route("/database", methods=["GET","POST"])
