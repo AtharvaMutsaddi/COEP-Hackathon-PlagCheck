@@ -62,8 +62,13 @@ def get_similar_lines(lines1,lines2):
                 
     return set(similar_lines)
 
+def preprocess_text(text):
+    return text.replace("\n", " ").replace("\r", " ").replace("\t", " ").replace("  ", "").strip()
+
 def get_cosine_simi(text1,text2):
     data = list()
+    text1 = preprocess_text(text1)
+    text2 = preprocess_text(text2)
     data.append(text1)
     data.append(text2)
     embeddings = embeddings_model.embed_documents(data)
