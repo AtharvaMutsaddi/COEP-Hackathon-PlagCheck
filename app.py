@@ -131,11 +131,39 @@ def local():
         file2.save(file_path2) 
         if filename1.endswith(".zip"):
             filename1=filename1.split(".")[0] 
-        # extract_zip_recursively(file_path1, f"../uploads/1/{file}") 
+        if filename2.endswith(".zip"):
+            filename2=filename2.split(".")[0] 
+        extract_zip_recursively(file_path1, f"../uploads/1/") 
         extract_zip_recursively(file_path2, "../uploads/2/") 
         folder_structure1 = get_detailed_report_of_files(f"../uploads/1/{filename1}")
-        fmap = get_file_mapping(folder_structure1) 
-        return {}
+        fmap1 = get_file_mapping(folder_structure1) 
+        print(fmap1)
+        folder_structure2 = get_detailed_report_of_files(f"../uploads/2/{filename2}")
+        fmap2 = get_file_mapping(folder_structure2)
+        print(fmap2)
+        superans={}
+        for ftype in fmap1.keys():
+            rel_file_paths1 = fmap1[ftype]
+            if ftype in fmap2.keys():
+                rel_file_paths2 = fmap2[ftype]
+            else:
+                rel_file_paths2=[]
+            # assuming code for all
+            ans=[]
+            for i in range(len(rel_file_paths1)):
+                file_content1=File_Reader().get_type_of_file_and_data(rel_file_paths1[i])["file_data"]
+                for j in range(len(rel_file_paths2)):
+                    file_content2=File_Reader().get_type_of_file_and_data(rel_file_paths2[j])["file_data"]
+                    subarr=[]
+                    simi=simhash_simi(file_content1,file_content2)
+                    subarr.append(simi)
+                    subarr.append(rel_file_paths1[i])
+                    subarr.append(rel_file_paths2[j])
+                    ans.append(subarr)
+            if(len(ans)>0):
+                superans[ftype]=ans
+        print(superans)
+        return superans
                 
 if __name__ == '__main__':
     extra_dirs = ['uploads']
