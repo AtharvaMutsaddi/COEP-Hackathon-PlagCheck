@@ -1,43 +1,69 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-6">Assignment Results</h1>
-{% if data %}
-<div class="overflow-x-auto">
-    <table class="table-auto w-full border-collapse border border-gray-300">
-        <thead>
-            <tr class="bg-gray-200">
-                <th class="px-4 py-2">ID</th>
-                <th class="px-4 py-2">Name of Assignment</th>
-                <th class="px-4 py-2">Branch</th>
-                <th class="px-4 py-2">Year</th>
-                <th class="px-4 py-2">Semester</th>
-                <th class="px-4 py-2">Div and Batch</th>
-                <th class="px-4 py-2">Year of Submission</th>
-                <th class="px-4 py-2">File Name</th>
-                <th class="px-4 py-2">Action</th>
+
+<section class="text-gray-600 body-font relative">
+    <div class="container px-5 py-24 mx-auto">
+        <h1 class="text-4xl font-bold text-center text-gray-900 py-5">Assignment Results</h1>
+        {% if data %}
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <thead class="text-xl text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr >
+                <th class="px-6 py-3" scope="col">
+                    ID
+                </th>
+                <th class="px-6 py-3" scope="col">
+                    Name of Assignment
+                </th>
+                <th class="px-6 py-3" scope="col">
+                    Branch
+                </th>
+                <th class="px-6 py-3" scope="col">
+                    Year
+                </th>
+                <th class="px-6 py-3" scope="col">
+                    Semester
+                </th>
+                <th class="px-6 py-3" scope="col">
+                    Div and Batch
+                </th>
+                <th class="px-6 py-3" scope="col">
+                    Year of Submission
+                </th>
+                <th class="px-6 py-3" scope="col">
+                    File Name
+                </th>
+                <th class="px-6 py-3" scope="col">
+                    Action
+                </th>
             </tr>
+            
         </thead>
         <tbody>
             {% for result in data %}
-            <tr class="bg-gray-200">
-                <td class="border px-4 py-2">{{ result['_id'] }}</td>
-                <td class="border px-4 py-2">{{ result['name_of_assignment'] }}</td>
-                <td class="border px-4 py-2">{{ result['branch'] }}</td>
-                <td class="border px-4 py-2">{{ result['year'] }}</td>
-                <td class="border px-4 py-2">{{ result['semester'] }}</td>
-                <td class="border px-4 py-2">{{ result['div'] }} , {{ result['batch'] }}</td>
-                <td class="border px-4 py-2">{{ result['year_of_submission'] }}</td>
-                <td class="border px-4 py-2">{{ result['file_name'] }}</td>
-                <td class="border px-4 py-2">
-                    <a href="/download/{{ result['_id'] }}" class="text-blue-500 hover:underline">Download</a>
+            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <td class="border px-6 py-3">{{ result['_id'] }}</td>
+                <td class="border px-6 py-3">{{ result['name_of_assignment'] }}</td>
+                <td class="border px-6 py-3">{{ result['branch'] }}</td>
+                <td class="border px-6 py-3">{{ result['year'] }}</td>
+                <td class="border px-6 py-3">{{ result['semester'] }}</td>
+                <td class="border px-6 py-3">{{ result['div'] }}, {{ result['batch'] }}</td>
+                <td class="border px-6 py-3">{{ result['year_of_submission'] }}</td>
+                <td class="border px-6 py-3">{{ result['file_name'] }}</td>
+                <td class="border px-6 py-3">
+                    <a href="/download/{{ result['_id'] }}" class="text-blue-500 hover:underline">Select</a>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
+        
     </table>
 </div>
 {% else %}
 <p class="text-gray-500">No results found.</p>
 {% endif %}
+</div>
+</section>
 {% endblock %}
