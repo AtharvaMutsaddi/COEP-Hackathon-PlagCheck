@@ -189,13 +189,21 @@ def local():
         # clear_uploads_dir("../uploads")
         return render_template('result.html',results=superans)
        
-@app.route("/download/<file_id>",methods=["GET","POST"])
-def download_file(file_id):
-    return file_id
+@app.route("/download/<assignment_id>",methods=["GET","POST"])
+def download_file(assignment_id):
+    if request.method=="GET":
+        Database().download_file(assignment_id)
+        return render_template('dbcompare.html',assignment_id=assignment_id)
+    else:
+        file = request.files['file']
+        filename1 = file.filename 
+        
 
 
 @app.route("/database", methods=["GET","POST"])
 def database():
+    if(request.method=="GET"):
+        return render_template('database.html')
     if(request.method=="POST"):
         branch = request.form['branch']
         year = request.form['year']
@@ -205,6 +213,43 @@ def database():
         return render_template('assignmenttables.html',data=data)
     
     return render_template('database.html')
+
+@app.route("/withtext", methods=["GET","POST"])
+def withtext():
+    if(request.method=="GET"):
+        return render_template('withtext.html')
+    else:
+        text = request.form['text']
+        file = request.files['file']
+        filename = file.filename
+    
+        file_path = os.path.join("../uploads", filename)
+        file.save(file_path)
+
+        if filename.endswith(".zip"):
+            filename=filename.split(".")[0]
+            
+        extract_zip_recursively(file_path, "../uploads/")
+
+        folder_structure = get_detailed_report_of_files(f"../uploads/{filename}")
+        fmap = get_file_mapping(folder_structure)
+        superans=[]
+        for ftype in fmap.keys():
+            rel_file_paths = fmap[ftype]
+            for i in range(len(rel_file_paths)):
+                file_content1=File_Reader().get_type_of_file_and_data(rel_file_paths[i])["file_data"]
+                subarr=[]
+                simi=get_tfidf_simi(file_content1,text)
+                subarr.append(simi)
+                subarr.append(rel_file_paths[i])
+                superans.append(subarr)
+            
+        superans = sorted(superans)
+
+        clear_uploads_dir("../uploads")
+        return render_template('textresult.html',results=superans)       
+   
+
 
 if __name__ == '__main__':
     extra_dirs = ['uploads']
