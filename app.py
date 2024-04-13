@@ -116,6 +116,7 @@ def within():
         folder_structure = get_detailed_report_of_files(f"../uploads/{filename}")
         fmap = get_file_mapping(folder_structure)
         superans = {}
+        file_type_res="Code"
         for ftype in fmap.keys():
             rel_file_paths = fmap[ftype]
             # assuming code for all
@@ -148,7 +149,8 @@ def within():
             superans[ftype] = ans
 
         superans = sort_results(superans)
-        return render_template("result.html", results=superans)
+        print(file_type_res)
+        return render_template("result.html", results=superans, filename=filename, inputfiletype=file_type_res)
 
 
 @app.route("/local", methods=["GET", "POST"])

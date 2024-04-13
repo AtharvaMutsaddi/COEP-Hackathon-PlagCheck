@@ -1,6 +1,8 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import Levenshtein
 
+def preprocess_text(text):
+    return text.replace("\n", " ").replace("\r", " ").replace("\t", " ").replace("  ", " ").strip()
 
 def split_text_into_chunks(text: str) -> list:
     return RecursiveCharacterTextSplitter(
@@ -10,6 +12,8 @@ def split_text_into_chunks(text: str) -> list:
 
 def get_similar_chunks(text_1: str, text_2: str) -> list:
     all_chunks_similarity_mapping = []
+    text_1 = preprocess_text(text_1)
+    text_2 = preprocess_text(text_2)
     chunks_1 = split_text_into_chunks(text_1)
     chunks_2 = split_text_into_chunks(text_2)
 
