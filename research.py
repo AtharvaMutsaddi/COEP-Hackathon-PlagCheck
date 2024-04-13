@@ -5,7 +5,6 @@ from langchain_openai import OpenAI
 
 def gptTopic(abstract:str):
 
-
     template = """Question: {question}
 
     Answer: Give ONE simple title of 3 words of the abstract provided. make sure you are not printing anything else except title."""
@@ -17,6 +16,10 @@ def gptTopic(abstract:str):
     llm_chain = LLMChain(prompt=prompt, llm=llm)
 
     output = llm_chain.run(abstract)
+
+    print("Title", output,end="\n")
+
     results = search_topic(output)
+
 
     return results
