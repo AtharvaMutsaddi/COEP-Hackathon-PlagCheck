@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for, flash, get_flashed_messages
 from gpt import getGPTResp
 from fs import *
-from nlp import simhash_simi, get_cosine_simi, get_tfidf_simi
+from nlp import simhash_simi, get_cosine_simi, get_tfidf_simi, generate_wordcloud
 from db import Database
 from scrap import *
 from chunk_similarity import *
@@ -486,7 +486,9 @@ def comparefile():
         file1_content = File_Reader().get_type_of_file_and_data(file1)["file_data"]
         file2_content = File_Reader().get_type_of_file_and_data(file2)["file_data"]
         ans = get_similar_chunks(file1_content, file2_content)
-
+    
+        generate_wordcloud(file1_content,"1")
+        generate_wordcloud(file2_content,"2")
         return render_template("compare_file.html", ans=ans)
     else:
         flash("Please log in!", "danger")

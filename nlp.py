@@ -1,6 +1,7 @@
 from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
 inference_api_key="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"
-
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
@@ -155,4 +156,12 @@ def check_similarity(text):
     df.columns = ["File Name", "Word Embedding Similarity", "Simhash Similarity"]
     return df
 
-    
+def generate_wordcloud(text,corpus_name):
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.title(f"Text corpus of {corpus_name}", fontsize=20)
+    plt.axis('off')
+    plt.tight_layout()
+    plt.savefig(f'static/{corpus_name}-wordcloud.png')
+    plt.clf() 
