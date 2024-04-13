@@ -263,7 +263,7 @@ class Database:
 # print(Database().get_assignment_records_from_db("Test 13","Computer Engineering","Third Year",))
 
 # print(Database().add_user("apc9214@gmail.com"))
-# print(Database().add_user("muss@gmail.com"))
+# print(Database().add_user("atharva.mutsaddi@gmail.com"))
 # print(Database().add_user("himanshukamdi3154@gmail.com"))
 # print(Database().add_user("abhishinde889@gmail.com"))
 

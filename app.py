@@ -478,15 +478,15 @@ def webresults():
                     file_type_res=File_Reader().isCode(rel_file_paths[i])
                     for j in range(len(res)):
                         text = res[j][0][0]
-                        text_file_path = os.path.join(f"../uploads/{user_id}",f"url{j}" )            
-                        with open(text_file_path, 'w') as url_file:
-                            url_file.write(text)
+                        # text_file_path = os.path.join(f"../uploads/{user_id}",f"url{j}" )            
+                        # with open(text_file_path, 'w') as url_file:
+                        #     url_file.write(text)
                         subarr = []
                         simi = get_tfidf_simi(file_content1, text)
                         subarr.append(simi)
                         subarr.append(rel_file_paths[i])
                         subarr.append(res[j][1])
-                        subarr.append(text_file_path)
+                        # subarr.append(text_file_path)
                         superans.append(subarr)
                         
             superans = sorted(superans, reverse=True)
