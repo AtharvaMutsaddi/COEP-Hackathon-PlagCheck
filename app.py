@@ -5,6 +5,7 @@ from nlp import simhash_simi, get_cosine_simi, get_tfidf_simi
 from db import Database
 from scrap import *
 from chunk_similarity import *
+from research import *
 import random
 
 app = Flask(__name__)
@@ -454,6 +455,53 @@ def comparefile():
     ans = get_similar_chunks(file1_content, file2_content)
 
     return render_template("compare_file.html", ans=ans)
+
+@app.route("/researchpaper", methods=["GET", "POST"])
+def researchpaper():
+    if request.method == "GET":
+        return render_template("researchpaper.html")
+    else:
+        abstract = request.form["abstract"]
+        print(abstract)
+        res = gptTopic(abstract)
+        # print("res\n",res)
+        file = request.files["file"]
+        filename = file.filename
+        file_path = os.path.join("../uploads", filename)
+        file.save(file_path)
+
+        if filename.endswith(".zip"):
+            filename = filename.split(".")[0]
+
+        extract_zip_recursively(file_path, "../uploads/")
+
+        folder_structure = get_detailed_report_of_files(f"../uploads/{filename}")
+        fmap = get_file_mapping(folder_structure)
+        superans = []
+        for ftype in fmap.keys():
+            rel_file_paths = fmap[ftype]
+            print("Number of websites", len(res))
+            for i in range(len(rel_file_paths)):
+                file_content1 = File_Reader().get_type_of_file_and_data(
+                    rel_file_paths[i]
+                )["file_data"]
+                for j in range(len(res)):
+                    text = res[j][0][0]
+                    print(text)
+                    subarr = []
+                    simi = get_tfidf_simi(file_content1, text)
+                    subarr.append(simi)
+                    subarr.append(rel_file_paths[i])
+                    print("\n\nUrl", res[j][0][1])
+                    print("\n\nUrl\n", res[j])
+                    print("\n\n")
+                    subarr.append(res[j][1])
+                    superans.append(subarr)
+
+        superans = sorted(superans, reverse=True)
+        print("\n\nsuperans\n",superans)
+
+        return render_template("webresults.html", results=superans)
 
 
 if __name__ == "__main__":
