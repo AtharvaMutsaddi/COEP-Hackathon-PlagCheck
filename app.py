@@ -7,6 +7,7 @@ from scrap import *
 from chunk_similarity import *
 from research import *
 import random
+from mail import *
 
 app = Flask(__name__)
 app.secret_key = '1234567890'
@@ -33,28 +34,56 @@ def home():
     if "user_id" in session:
         return render_template("home.html",checkloggedin=True)
     else:
-        flash("Please log in!", "danger")
+        flash("Please log in!", "Warning")
         return redirect(url_for("login"))
         
 
 @app.route("/",methods=["GET","POST"])
 def login():
-    if request.method=="POST":
-        email = request.form["email"]
-        token = request.form["token"]
-        status= Database().verify_user(email,token)
-        if(status==True):
-            session["user_id"]=token
-            return redirect(url_for("home"))
-        else:
-            flash("User with the entered Credentials was not found. Please try again.", "danger")
-    return render_template("login.html")
+    if "user_id" not in session:
+        if request.method=="POST":
+            email = request.form["email"]
+            token = request.form["token"]
+            status= Database().verify_user(email,token)
+            if(status==True):
+                session["user_id"]=token
+                return redirect(url_for("home"))
+            else:
+                flash("User with the entered Credentials was not found. Please try again.", "Warning")
+        return render_template("login.html")
+    else:
+        flash("You are already logged in! Please logout first.", "Warning")
+        return redirect(url_for("home"))
 
 @app.route("/logout", methods=["POST"])
 def logout():
     if  request.method == "POST":
         session.clear()
         return redirect(url_for("login"))
+    
+@app.route("/forgottoken", methods=["GET", "POST"])
+def forgotToken():
+    if "user_id" not in session:
+        if request.method == "GET":
+            return render_template("forgottoken.html")
+        if request.method=="POST":
+            email = request.form["email"]            
+
+            resp = Database().get_user_access_token_from_email_id(email)
+
+            if(resp == ""):
+                flash("User doesn't exist.", "Warning")
+            else:
+                send_email(email, body=f"Your token is {resp}")
+                flash("Please check you mail. Access token is sent on mail.", "Note")
+                return redirect(url_for("login"))
+            
+        return render_template("forgottoken.html")
+
+
+    else:
+        flash("You are already logged in! Please logout first.", "Warning")
+        return redirect(url_for("home"))
     
 @app.route("/gptpage")
 def gptpage():
@@ -120,7 +149,7 @@ def gpt():
         # clear_uploads_dir("../uploads")
         return render_template("table.html", table_rows=table_rows)
     else:
-        flash("Please log in!", "danger")
+        flash("Please log in!", "Warning")
         return redirect(url_for("login"))
 
 
@@ -181,7 +210,7 @@ def within():
             superans = sort_results(superans)
             return render_template("result.html", results=superans, filename=filename, inputfiletype=file_type_res)
     else:
-            flash("Please log in!", "danger")
+            flash("Please log in!", "Warning")
             return redirect(url_for("login"))
        
 
@@ -255,7 +284,7 @@ def local():
             # clear_uploads_dir("../uploads")
             return render_template("result.html", results=superans)
     else:
-        flash("Please log in!", "danger")
+        flash("Please log in!", "Warning")
         return redirect(url_for("login"))
 
 @app.route("/download/<assignment_id>", methods=["GET", "POST"])
@@ -323,7 +352,7 @@ def download_file(assignment_id):
             # clear_uploads_dir("../uploads")
             return render_template("result.html", results=superans)
     else:
-        flash("Please log in!", "danger")
+        flash("Please log in!", "Warning")
         return redirect(url_for("login"))
 
 
@@ -343,7 +372,7 @@ def database():
 
         return render_template("database.html")
     else:
-        flash("Please log in!", "danger")
+        flash("Please log in!", "Warning")
         return redirect(url_for("login"))
 
 
@@ -390,7 +419,7 @@ def withtext():
 
             return render_template("textresult.html", results=superans)
     else:
-        flash("Please log in!", "danger")
+        flash("Please log in!", "Warning")
         return redirect(url_for("login"))
 
 @app.route("/webresults", methods=["GET", "POST"])
@@ -440,7 +469,7 @@ def webresults():
             superans = sorted(superans, reverse=True)
             return render_template("webresults.html", results=superans)
     else:
-        flash("Please log in!", "danger")
+        flash("Please log in!", "Warning")
         return redirect(url_for("login"))
 
 # To upload assignments to the database
@@ -473,7 +502,7 @@ def uploadassg():
 
         return render_template("uploadassg.html")
     else:
-        flash("Please log in!", "danger")
+        flash("Please log in!", "Warning")
         return redirect(url_for("login"))
 
 
@@ -490,7 +519,7 @@ def comparefile():
 
         return render_template("compare_file.html", ans=ans)
     else:
-        flash("Please log in!", "danger")
+        flash("Please log in!", "Warning")
         return redirect(url_for("login"))
 
 @app.route("/researchpaper", methods=["GET", "POST"])
