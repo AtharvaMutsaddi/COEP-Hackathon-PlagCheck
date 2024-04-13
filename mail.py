@@ -21,4 +21,4 @@ def send_email(email_reciever: str, body: str) -> None:
         smtp.sendmail(email_sender, email_reciever, em.as_string())
 
 
-send_email("abhishinde889@gmail.com", "Hello Loki!!")
+# send_email("abhishinde889@gmail.com", "Hello Loki!!")
