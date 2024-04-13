@@ -425,5 +425,6 @@ def comparefile():
 
 
 if __name__ == "__main__":
-    extra_dirs = ["uploads"]
-    app.run(debug=True, extra_files=extra_dirs)
+    clear_uploads_dir("../uploads/")
+    clear_uploads_dir("../cache/")
+    app.run(debug=True)
