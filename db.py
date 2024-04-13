@@ -180,33 +180,60 @@ class Database:
                 print("User Verification Unsuccessfull!")
                 return False
 
-    def add_history_record_in_user_log(self, user_token, file_accessed) -> None:
+    def add_history_record_in_user_log(
+        self, user_token: str, file_accessed: str, consumer_user_token: str
+    ) -> None:
         """
-        This function will add the file accessed by the user to his logs and max limit is 2 so at any point of time it will only store the latest 2 log records
+        This function will add the file accessed by the user to his logs and max limit is 5 so at any point of time it will only store the latest 5 log records
         """
-
         try:
             record_id = ObjectId(user_token)
             user_record = self.db["users"].find_one({"_id": record_id})
             if user_record is None:
                 print("User does not exist")
                 return
+
+            consumer_user_id = ObjectId(consumer_user_token)
+            consumer_record = self.db["users"].find_one({"_id": consumer_user_id})
+            if consumer_record is None:
+                print("Counsumer does not exists")
+                return
+
+            ist_now = str(datetime.datetime.now(pytz.timezone("Asia/Kolkata")))
+
+            if len(user_record["logs_history"]) == 5:
+                print("Deleting the oldest record!")
+                user_record["logs_history"] = user_record["logs_history"][1::]
+
+            user_record["logs_history"].append(
+                {
+                    "file_accessed": file_accessed,
+                    "date_time": ist_now,
+                    "consumer_email_id": consumer_record["email_id"],
+                }
+            )
+
+            self.db["users"].update_one(
+                {"_id": record_id},
+                {"$set": {"logs_history": user_record["logs_history"]}},
+            )
+            print("History log added succesfully!")
+
+        except Exception as e:
+            print(f"Error occurred: {e}")
+
+    def get_all_history_records_for_user(self, user_token: str) -> list:
+        try:
+            user_id = ObjectId(user_token)
+            user_record = self.db["users"].find_one({"_id": user_id})
+            if user_record is None:
+                print("This user does not exists")
+                return []
             else:
-                utc_now = datetime.datetime.utcnow()
-                ist_tz = pytz.timezone("Asia/Kolkata")
-                ist_now = str(utc_now.astimezone(ist_tz))
-
-                if len(user_record["logs_history"] == 2):
-                    user_record["logs_history"] = user_record["logs_history"][1::]
-
-                user_record["logs_history"].append(
-                    {"file_accessed": file_accessed, "date_time": ist_now}
-                )
-
-                user_record.save()
-
-        except:
-            print("Error occurred")
+                return user_record["logs_history"]
+        except Exception as e:
+            print("Error occured", e)
+            return []
 
 
 # Database().create_record_and_upload_assignment("A1","Computer Engineering","Third Year","Div1","T1","Even Sem","Assignment 1.zip")
@@ -218,4 +245,6 @@ class Database:
 # print(Database().get_assignment_records_from_db("Test 13","Computer Engineering","Third Year",))
 
 # print(Database().add_user("apc9214@gmail.com"))
-# print(Database().verify_user("apc9214@gmail.com","661a006a149cb69342558a3"))
+# print(Database().add_user("muss@gmail.com"))
+# Database().add_history_record_in_user_log("661a052071d8d8f0d045858f", "Abhishek.zip","661a055fc4485de8ec2d4e77")
+# print(Database().get_all_history_records_for_user("661a055fc4485de8ec2d4e7"))
