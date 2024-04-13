@@ -10,8 +10,8 @@
 
 <body class="bg-white">
 
-    <header class="text-gray-600 body-font bg-sky-100">
-        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+    <header class="text-gray-600 body-font bg-blue-200">
+        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center justify-between">
             <a class="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
                     stroke-linejoin="round" stroke-width="2" class="w-10 h-10 text-white p-2 bg-indigo-500 rounded-full"
@@ -19,8 +19,15 @@
                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5">
                     </path>
                 </svg>
-                <a class="mr-5 hover:text-gray-900" href="/home"><span class="ml-3 text-xl">Plag Detection</span></a>
+                <a class="mr-5 hover:text-gray-900" href="/home"><span class="ml-3 text-xl">Plagiarism
+                        Detection</span></a>
             </a>
+            <form method="POST" action="/logout" class="mt-3">
+                <button type="submit"
+                    class="inline-flex text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg">
+                    Logout
+                </button>
+            </form>
         </div>
     </header>
 

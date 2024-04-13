@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="text-gray-600 body-font relative mt-6">
-    <div class="container px-5 py-20 mx-auto bg-white">
-        <form action="/gpt" method="POST" enctype="multipart/form-data"> 
+<section class="text-gray-600 body-font relative mt-3">
+    <div class="container px-5 py-20 mx-auto bg-white flex justify-center" >
+        <form action="/gpt" method="POST" enctype="multipart/form-data" class="border-2 p-6 inline-block"> 
             <div class="flex flex-col text-center w-full mb-12">
                 <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">Get Similarity with ChatGPT</h1>
                 <p class="lg:w-2/3 mx-auto leading-relaxed text-base">Enter problem statement, and choose whether you want code or
