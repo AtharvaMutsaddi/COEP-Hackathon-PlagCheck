@@ -12,3 +12,6 @@ openai
 Flask
 googlesearch-python
 langchain
+bs4
+langchain_community
+langchain_openai
