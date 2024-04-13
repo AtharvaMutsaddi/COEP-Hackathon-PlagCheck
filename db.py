@@ -86,6 +86,7 @@ class Database:
             "year_of_submission": datetime.datetime.now().year,
             "file_id": self.upload_file(file_name, user_id),
             "file_name": file_name,
+            "user_id": user_id
         }
 
         self.db["assignment_records"].insert_one(new_record)
@@ -189,7 +190,7 @@ class Database:
         self, user_token: str, file_accessed: str, consumer_user_token: str
     ) -> None:
         """
-        This function will add the file accessed by the user to his logs and max limit is 5 so at any point of time it will only store the latest 5 log records
+        This function will add the file accessed by the user to his logs and max limit is 10 so at any point of time it will only store the latest 10 log records
         """
         try:
             record_id = ObjectId(user_token)
@@ -206,7 +207,7 @@ class Database:
 
             ist_now = str(datetime.datetime.now(pytz.timezone("Asia/Kolkata")))
 
-            if len(user_record["logs_history"]) == 5:
+            if len(user_record["logs_history"]) == 10:
                 print("Deleting the oldest record!")
                 user_record["logs_history"] = user_record["logs_history"][1::]
 

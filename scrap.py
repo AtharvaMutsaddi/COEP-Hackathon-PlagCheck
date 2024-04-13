@@ -10,7 +10,7 @@ def search_topic(topic):
     search_engine_id = '8119621a04913439a'
     query = f'{topic}'
     # Base URL for Google Custom Search API
-    url = f'https://www.googleapis.com/customsearch/v1?q={query}&key={api_key}&cx={search_engine_id}&num=3'
+    url = f'https://www.googleapis.com/customsearch/v1?q={query}&key={api_key}&cx={search_engine_id}&num=5'
     results=[]
     try:
         response = requests.get(url)

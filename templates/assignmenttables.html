@@ -53,7 +53,7 @@
                 <td class="border px-6 py-3">{{ result['year_of_submission'] }}</td>
                 <td class="border px-6 py-3">{{ result['file_name'] }}</td>
                 <td class="border px-6 py-3">
-                    <a href="/download/{{ result['_id'] }}" class="text-blue-500 hover:underline">Select</a>
+                    <a href="/download/{{ result['_id'] }}/{{result['user_id']}}/{{result['file_name']}}" class="text-blue-500 hover:underline">Select</a>
                 </td>
             </tr>
             {% endfor %}

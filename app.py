@@ -247,6 +247,8 @@ def local():
             folder_structure2 = get_detailed_report_of_files(f"../uploads/{user_id}/2/{filename2}")
             fmap2 = get_file_mapping(folder_structure2)
             superans = {}
+            file_type_res="Code"
+
             for ftype in fmap1.keys():
                 rel_file_paths1 = fmap1[ftype]
                 if ftype in fmap2.keys():
@@ -282,18 +284,21 @@ def local():
             superans = sort_results(superans)
 
             # clear_uploads_dir("../uploads")
-            return render_template("result.html", results=superans)
+            combined_name = filename1+"_"+filename2
+            return render_template("result.html", results=superans, filename=combined_name, inputfiletype=file_type_res)
     else:
         flash("Please log in!", "Warning")
         return redirect(url_for("login"))
 
-@app.route("/download/<assignment_id>", methods=["GET", "POST"])
-def download_file(assignment_id):
+@app.route("/download/<assignment_id>/<owner_id>/<file_name>", methods=["GET", "POST"])
+def download_file(assignment_id, owner_id, file_name):
     if "user_id" in session:
         if request.method == "GET":
             user_id = session["user_id"]
-            Database().download_file(assignment_id, user_id=user_id)
-            return render_template("dbcompare.html", assignment_id=assignment_id)
+            print(assignment_id, ".")
+            Database().download_file(assignment_record_id=assignment_id, user_id=user_id)
+            Database().add_history_record_in_user_log(user_token=owner_id, file_accessed=file_name, consumer_user_token=user_id)
+            return render_template("dbcompare.html", assignment_id=assignment_id, owner_id=owner_id, file_name=file_name)
         else:
             file = request.files["file"]
             filename = file.filename
@@ -387,9 +392,14 @@ def withtext():
             filename = file.filename
             
             user_id = session["user_id"]
-            
+
             if not os.path.exists(f"../uploads/{user_id}"):
                 os.makedirs(f"../uploads/{user_id}")
+
+            text_file_path = os.path.join(f"../uploads/{user_id}", "input_text")
+
+            with open(text_file_path, 'w') as text_file:
+                text_file.write(text)
 
             file_path = os.path.join(f"../uploads/{user_id}", filename)
             file.save(file_path)
@@ -402,6 +412,7 @@ def withtext():
             folder_structure = get_detailed_report_of_files(f"../uploads/{user_id}/{filename}")
             fmap = get_file_mapping(folder_structure)
             superans = []
+            file_type_res="Code"
             for ftype in fmap.keys():
                 rel_file_paths = fmap[ftype]
                 for i in range(len(rel_file_paths)):
@@ -409,6 +420,14 @@ def withtext():
                         rel_file_paths[i]
                     )["file_data"]
                     subarr = []
+                    file_type_res=File_Reader().isCode(rel_file_paths[i])
+                    if(file_type_res=="Code"):
+                        simi = (simhash_simi(file_content1, text)+get_tfidf_simi(file_content1,text))/2
+                    elif file_type_res=="Text":
+                        simi=get_cosine_simi(file_content1,text)
+                    else:
+                        print("Unsupported File Extension")
+                        simi=0
                     # simi=get_tfidf_simi(file_content1,text)
                     simi = simhash_simi(file_content1, text)
                     subarr.append(simi)
@@ -416,8 +435,9 @@ def withtext():
                     superans.append(subarr)
 
             superans = sorted(superans)
+            print(superans)
 
-            return render_template("textresult.html", results=superans)
+            return render_template("textresult.html", results=superans, filename=filename, inputfiletype=file_type_res, text=text_file_path)
     else:
         flash("Please log in!", "Warning")
         return redirect(url_for("login"))
@@ -448,26 +468,30 @@ def webresults():
             folder_structure = get_detailed_report_of_files(f"../uploads/{user_id}/{filename}")
             fmap = get_file_mapping(folder_structure)
             superans = []
+            file_type_res= "Code"
             for ftype in fmap.keys():
                 rel_file_paths = fmap[ftype]
-                # print("Number of websites", len(res))
                 for i in range(len(rel_file_paths)):
                     file_content1 = File_Reader().get_type_of_file_and_data(
                         rel_file_paths[i]
                     )["file_data"]
+                    file_type_res=File_Reader().isCode(rel_file_paths[i])
                     for j in range(len(res)):
                         text = res[j][0][0]
-                        # print(text)
+                        text_file_path = os.path.join(f"../uploads/{user_id}",f"url{j}" )            
+                        with open(text_file_path, 'w') as url_file:
+                            url_file.write(text)
                         subarr = []
                         simi = get_tfidf_simi(file_content1, text)
                         subarr.append(simi)
                         subarr.append(rel_file_paths[i])
-                        # print("Url", res[j][1])
                         subarr.append(res[j][1])
+                        subarr.append(text_file_path)
                         superans.append(subarr)
                         
             superans = sorted(superans, reverse=True)
-            return render_template("webresults.html", results=superans)
+
+            return render_template("webresults.html", results=superans, filename=filename, inputfiletype=file_type_res)
     else:
         flash("Please log in!", "Warning")
         return redirect(url_for("login"))
@@ -526,51 +550,68 @@ def comparefile():
 
 @app.route("/researchpaper", methods=["GET", "POST"])
 def researchpaper():
-    if request.method == "GET":
-        return render_template("researchpaper.html")
+    if "user_id" in session:
+        if request.method == "GET":
+            return render_template("researchpaper.html")
+        else:
+            abstract = request.form["abstract"]
+            print(abstract)
+            res = gptTopic(abstract)
+            # print("res\n",res)
+            file = request.files["file"]
+            filename = file.filename
+            file_path = os.path.join("../uploads", filename)
+            file.save(file_path)
+
+            if filename.endswith(".zip"):
+                filename = filename.split(".")[0]
+
+            extract_zip_recursively(file_path, "../uploads/")
+
+            folder_structure = get_detailed_report_of_files(f"../uploads/{filename}")
+            fmap = get_file_mapping(folder_structure)
+            superans = []
+            for ftype in fmap.keys():
+                rel_file_paths = fmap[ftype]
+                print("Number of websites", len(res))
+                for i in range(len(rel_file_paths)):
+                    file_content1 = File_Reader().get_type_of_file_and_data(
+                        rel_file_paths[i]
+                    )["file_data"]
+                    for j in range(len(res)):
+                        text = res[j][0][0]
+                        print(text)
+                        subarr = []
+                        simi = get_tfidf_simi(file_content1, text)
+                        subarr.append(simi)
+                        subarr.append(rel_file_paths[i])
+                        print("\n\nUrl", res[j][0][1])
+                        print("\n\nUrl\n", res[j])
+                        print("\n\n")
+                        subarr.append(res[j][1])
+                        superans.append(subarr)
+
+            superans = sorted(superans, reverse=True)
+            print("\n\nsuperans\n",superans)
+
+            return render_template("webresults.html", results=superans)
     else:
-        abstract = request.form["abstract"]
-        print(abstract)
-        res = gptTopic(abstract)
-        # print("res\n",res)
-        file = request.files["file"]
-        filename = file.filename
-        file_path = os.path.join("../uploads", filename)
-        file.save(file_path)
+        flash("Please log in!", "Warning")
+        return redirect(url_for("login"))
 
-        if filename.endswith(".zip"):
-            filename = filename.split(".")[0]
 
-        extract_zip_recursively(file_path, "../uploads/")
+@app.route("/logs", methods=["GET"])
+def logs():
+    if "user_id" in session:
+        user_id = session["user_id"]
 
-        folder_structure = get_detailed_report_of_files(f"../uploads/{filename}")
-        fmap = get_file_mapping(folder_structure)
-        superans = []
-        for ftype in fmap.keys():
-            rel_file_paths = fmap[ftype]
-            print("Number of websites", len(res))
-            for i in range(len(rel_file_paths)):
-                file_content1 = File_Reader().get_type_of_file_and_data(
-                    rel_file_paths[i]
-                )["file_data"]
-                for j in range(len(res)):
-                    text = res[j][0][0]
-                    print(text)
-                    subarr = []
-                    simi = get_tfidf_simi(file_content1, text)
-                    subarr.append(simi)
-                    subarr.append(rel_file_paths[i])
-                    print("\n\nUrl", res[j][0][1])
-                    print("\n\nUrl\n", res[j])
-                    print("\n\n")
-                    subarr.append(res[j][1])
-                    superans.append(subarr)
-
-        superans = sorted(superans, reverse=True)
-        print("\n\nsuperans\n",superans)
-
-        return render_template("webresults.html", results=superans)
-
+        logs = Database().get_all_history_records_for_user(user_token=user_id)
+        print(logs)
+        
+        return render_template("logs.html", logs=logs)
+    else:
+        flash("Please log in!", "Warning")
+        return redirect(url_for("login"))
 
 if __name__ == "__main__":
     clear_uploads_dir("../uploads/")
