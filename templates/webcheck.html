@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="text-gray-600 body-font relative bg-white mt-16">
-    <div class="container px-5 py-24 mx-auto">
-        <form action="/webresults" method="POST" enctype="multipart/form-data"> 
+<section class="text-gray-600 body-font relative bg-white mt-6 ">
+    <div class="container px-5 py-24 mx-auto flex justify-center">
+        <form action="/webresults" method="POST" enctype="multipart/form-data" class="border-2 p-6 inline-block"> 
             <div class="flex flex-col text-center w-full mb-12">
                 <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">Get Similarity With Documents On The Web</h1>
                 <p class="lg:w-2/3 mx-auto leading-relaxed text-base">Enter a topic and we will get top 5 websites from the web to check similarity with uploaded doc.</p>
