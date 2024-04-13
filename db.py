@@ -246,5 +246,7 @@ class Database:
 
 # print(Database().add_user("apc9214@gmail.com"))
 # print(Database().add_user("muss@gmail.com"))
+print(Database().add_user("himanshukamdi3154@gmail.com"))
+
 # Database().add_history_record_in_user_log("661a052071d8d8f0d045858f", "Abhishek.zip","661a055fc4485de8ec2d4e77")
 # print(Database().get_all_history_records_for_user("661a055fc4485de8ec2d4e7"))
