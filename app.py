@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect, url_for, flash, get_flashed_messages
 from gpt import getGPTResp
 from fs import *
 from nlp import simhash_simi, get_cosine_simi, get_tfidf_simi
@@ -8,7 +8,7 @@ from chunk_similarity import *
 import random
 
 app = Flask(__name__)
-
+app.secret_key = '1234567890'
 
 # temp_cache = dict()
 
@@ -27,11 +27,34 @@ def clear_uploads_dir(path):
             print("Removed directory:", dir_path)
 
 
-@app.route("/")
+@app.route("/home")
 def home():
-    return render_template("home.html")
+    if "user_id" in session:
+        return render_template("home.html",checkloggedin=True)
+    else:
+        flash("Please log in!", "danger")
+        return redirect(url_for("login"))
+        
 
+@app.route("/",methods=["GET","POST"])
+def login():
+    if request.method=="POST":
+        email = request.form["email"]
+        token = request.form["token"]
+        status= Database().verify_user(email,token)
+        if(status==True):
+            session["user_id"]=token
+            return redirect(url_for("home"))
+        else:
+            flash("User with the entered Credentials was not found. Please try again.", "danger")
+    return render_template("login.html")
 
+@app.route("/logout", methods=["POST"])
+def logout():
+    if  request.method == "POST":
+        session.clear()
+        return redirect(url_for("login"))
+    
 @app.route("/gptpage")
 def gptpage():
     return render_template("gpt.html")
