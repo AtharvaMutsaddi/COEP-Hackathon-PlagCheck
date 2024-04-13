@@ -247,6 +247,8 @@ def local():
             folder_structure2 = get_detailed_report_of_files(f"../uploads/{user_id}/2/{filename2}")
             fmap2 = get_file_mapping(folder_structure2)
             superans = {}
+            file_type_res="Code"
+
             for ftype in fmap1.keys():
                 rel_file_paths1 = fmap1[ftype]
                 if ftype in fmap2.keys():
@@ -282,7 +284,8 @@ def local():
             superans = sort_results(superans)
 
             # clear_uploads_dir("../uploads")
-            return render_template("result.html", results=superans)
+            combined_name = filename1+"_"+filename2
+            return render_template("result.html", results=superans, filename=combined_name, inputfiletype=file_type_res)
     else:
         flash("Please log in!", "Warning")
         return redirect(url_for("login"))
@@ -389,9 +392,14 @@ def withtext():
             filename = file.filename
             
             user_id = session["user_id"]
-            
+
             if not os.path.exists(f"../uploads/{user_id}"):
                 os.makedirs(f"../uploads/{user_id}")
+
+            text_file_path = os.path.join(f"../uploads/{user_id}", "input_text")
+
+            with open(text_file_path, 'w') as text_file:
+                text_file.write(text)
 
             file_path = os.path.join(f"../uploads/{user_id}", filename)
             file.save(file_path)
@@ -404,6 +412,7 @@ def withtext():
             folder_structure = get_detailed_report_of_files(f"../uploads/{user_id}/{filename}")
             fmap = get_file_mapping(folder_structure)
             superans = []
+            file_type_res="Code"
             for ftype in fmap.keys():
                 rel_file_paths = fmap[ftype]
                 for i in range(len(rel_file_paths)):
@@ -411,6 +420,14 @@ def withtext():
                         rel_file_paths[i]
                     )["file_data"]
                     subarr = []
+                    file_type_res=File_Reader().isCode(rel_file_paths[i])
+                    if(file_type_res=="Code"):
+                        simi = (simhash_simi(file_content1, text)+get_tfidf_simi(file_content1,text))/2
+                    elif file_type_res=="Text":
+                        simi=get_cosine_simi(file_content1,text)
+                    else:
+                        print("Unsupported File Extension")
+                        simi=0
                     # simi=get_tfidf_simi(file_content1,text)
                     simi = simhash_simi(file_content1, text)
                     subarr.append(simi)
@@ -418,8 +435,9 @@ def withtext():
                     superans.append(subarr)
 
             superans = sorted(superans)
+            print(superans)
 
-            return render_template("textresult.html", results=superans)
+            return render_template("textresult.html", results=superans, filename=filename, inputfiletype=file_type_res, text=text_file_path)
     else:
         flash("Please log in!", "Warning")
         return redirect(url_for("login"))
@@ -450,26 +468,30 @@ def webresults():
             folder_structure = get_detailed_report_of_files(f"../uploads/{user_id}/{filename}")
             fmap = get_file_mapping(folder_structure)
             superans = []
+            file_type_res= "Code"
             for ftype in fmap.keys():
                 rel_file_paths = fmap[ftype]
-                # print("Number of websites", len(res))
                 for i in range(len(rel_file_paths)):
                     file_content1 = File_Reader().get_type_of_file_and_data(
                         rel_file_paths[i]
                     )["file_data"]
+                    file_type_res=File_Reader().isCode(rel_file_paths[i])
                     for j in range(len(res)):
                         text = res[j][0][0]
-                        # print(text)
+                        text_file_path = os.path.join(f"../uploads/{user_id}",f"url{j}" )            
+                        with open(text_file_path, 'w') as url_file:
+                            url_file.write(text)
                         subarr = []
                         simi = get_tfidf_simi(file_content1, text)
                         subarr.append(simi)
                         subarr.append(rel_file_paths[i])
-                        # print("Url", res[j][1])
                         subarr.append(res[j][1])
+                        subarr.append(text_file_path)
                         superans.append(subarr)
                         
             superans = sorted(superans, reverse=True)
-            return render_template("webresults.html", results=superans)
+
+            return render_template("webresults.html", results=superans, filename=filename, inputfiletype=file_type_res)
     else:
         flash("Please log in!", "Warning")
         return redirect(url_for("login"))
