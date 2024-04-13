@@ -4,7 +4,7 @@ import urllib.parse
 from bson import ObjectId
 import datetime
 import pytz
-
+import os
 
 class Database:
     def __init__(self) -> None:
@@ -35,8 +35,8 @@ class Database:
         self.db = connection["coep_hackathon"]
         self.fs = gridfs.GridFS(self.db, collection="files")
 
-    def upload_file(self, file_name: str) -> None:
-        with open("../uploads/" + file_name, "rb") as f:
+    def upload_file(self, file_name: str, user_id: str) -> None:
+        with open(f"../uploads/{user_id}/" + file_name, "rb") as f:
             data = f.read()
 
         new_file_id = self.fs.put(data, filename=file_name)
@@ -52,6 +52,7 @@ class Database:
         batch: str,
         semester: str,
         file_name: str,
+        user_id: str
     ) -> None:
         """
         Use this function to save the assignmnet record with given propeties in db.It will do things create a entry for assignment record and also upload your file to mongodb. Make sure that file you want to upload is in the uploads directory. Just provide the name of file that is in the uploads directory
@@ -82,7 +83,7 @@ class Database:
             "div": div,
             "batch": batch,
             "year_of_submission": datetime.datetime.now().year,
-            "file_id": self.upload_file(file_name),
+            "file_id": self.upload_file(file_name, user_id),
             "file_name": file_name,
         }
 
@@ -109,7 +110,7 @@ class Database:
 
         return records
 
-    def download_file(self, assignment_record_id) -> None:
+    def download_file(self, assignment_record_id, user_id) -> None:
         """
         This function will download the file corresponding to the given file id in the cache directory
         """
@@ -118,8 +119,11 @@ class Database:
         )
 
         out_data = self.fs.get(helper["file_id"]).read()
+        
+        if not os.path.exists(f"../cache/{user_id}/{assignment_record_id}"):
+                os.makedirs(f"../cache/{user_id}/{assignment_record_id}")
 
-        with open(f"../cache/{assignment_record_id}.zip", "wb") as f:
+        with open(f"../cache/{user_id}/{assignment_record_id}.zip", "wb") as f:
             f.write(out_data)
 
         print(f"{helper['file_name']} downloaded successfully")
@@ -246,7 +250,7 @@ class Database:
 
 # print(Database().add_user("apc9214@gmail.com"))
 # print(Database().add_user("muss@gmail.com"))
-print(Database().add_user("himanshukamdi3154@gmail.com"))
+# print(Database().add_user("himanshukamdi3154@gmail.com"))
 
 # Database().add_history_record_in_user_log("661a052071d8d8f0d045858f", "Abhishek.zip","661a055fc4485de8ec2d4e77")
 # print(Database().get_all_history_records_for_user("661a055fc4485de8ec2d4e7"))
