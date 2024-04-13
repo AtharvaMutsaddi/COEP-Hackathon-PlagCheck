@@ -119,61 +119,68 @@ def gpt():
 
 @app.route("/within", methods=["GET", "POST"])
 def within():
+    if "user_id" in session:
+        if request.method == "GET":
+            return render_template("withinzip.html")
+        else:
+            # clear_uploads_dir("../uploads")
+            # print("Post")
+            file = request.files["file"]
+            filename = file.filename
+            user_id=session["user_id"]
+            
+            if not os.path.exists(f"../uploads/{user_id}"):
+                os.makedirs(f"../uploads/{user_id}")
+            file_path = os.path.join(f"../uploads/{user_id}", filename)
+            file.save(file_path)
 
-    if request.method == "GET":
-        return render_template("withinzip.html")
-    else:
-        # clear_uploads_dir("../uploads")
-        # print("Post")
-        file = request.files["file"]
-        filename = file.filename
+            if filename.endswith(".zip"):
+                filename = filename.split(".")[0]
 
-        file_path = os.path.join("../uploads", filename)
-        file.save(file_path)
+            extract_zip_recursively(file_path, f"../uploads/{user_id}")
 
-        if filename.endswith(".zip"):
-            filename = filename.split(".")[0]
-
-        extract_zip_recursively(file_path, "../uploads/")
-
-        folder_structure = get_detailed_report_of_files(f"../uploads/{filename}")
-        fmap = get_file_mapping(folder_structure)
-        superans = {}
-        file_type_res="Code"
-        for ftype in fmap.keys():
-            rel_file_paths = fmap[ftype]
-            # assuming code for all
-            ans = []
-            for i in range(len(rel_file_paths)):
-                file_content1 = File_Reader().get_type_of_file_and_data(
-                    rel_file_paths[i]
-                )["file_data"]
-                for j in range(i + 1, len(rel_file_paths)):
-                    file_content2 = File_Reader().get_type_of_file_and_data(
-                        rel_file_paths[j]
+            folder_structure = get_detailed_report_of_files(f"../uploads/{user_id}/{filename}")
+            fmap = get_file_mapping(folder_structure)
+            superans = {}
+            file_type_res="Code"
+            for ftype in fmap.keys():
+                rel_file_paths = fmap[ftype]
+                # assuming code for all
+                ans = []
+                for i in range(len(rel_file_paths)):
+                    file_content1 = File_Reader().get_type_of_file_and_data(
+                        rel_file_paths[i]
                     )["file_data"]
-                    subarr = []
-                    file_type_res=File_Reader().isCode(rel_file_paths[j])
-                    # print(file_path)
-                    print(file_type_res)
-                    if(file_type_res=="Code"):
-                        simi = (simhash_simi(file_content1, file_content2)+get_tfidf_simi(file_content1,file_content2))/2
-                    elif file_type_res=="Text":
-                        simi=get_cosine_simi(file_content1,file_content2)
-                    else:
-                        print("Unsupported File Extension")
-                        simi=0
-                    # simi=get_tfidf_simi(file_content1,file_content2)
-                    subarr.append(simi)
-                    subarr.append(rel_file_paths[i])
-                    subarr.append(rel_file_paths[j])
-                    ans.append(subarr)
+                    for j in range(i + 1, len(rel_file_paths)):
+                        file_content2 = File_Reader().get_type_of_file_and_data(
+                            rel_file_paths[j]
+                        )["file_data"]
+                        subarr = []
+                        file_type_res=File_Reader().isCode(rel_file_paths[j])
+                        # print(file_path)
+                        print(file_type_res)
+                        if(file_type_res=="Code"):
+                            simi = (simhash_simi(file_content1, file_content2)+get_tfidf_simi(file_content1,file_content2))/2
+                        elif file_type_res=="Text":
+                            simi=get_cosine_simi(file_content1,file_content2)
+                        else:
+                            print("Unsupported File Extension")
+                            simi=0
+                        # simi=get_tfidf_simi(file_content1,file_content2)
+                        subarr.append(simi)
+                        subarr.append(rel_file_paths[i])
+                        subarr.append(rel_file_paths[j])
+                        ans.append(subarr)
 
-            superans[ftype] = ans
+                superans[ftype] = ans
 
-        superans = sort_results(superans)
-        print(file_type_res)
-        return render_template("result.html", results=superans, filename=filename, inputfiletype=file_type_res)
+            superans = sort_results(superans)
+            print(file_type_res)
+            return render_template("result.html", results=superans, filename=filename, inputfiletype=file_type_res)
+    else:
+            flash("Please log in!", "danger")
+            return redirect(url_for("login"))
+       
 
 
 @app.route("/local", methods=["GET", "POST"])
