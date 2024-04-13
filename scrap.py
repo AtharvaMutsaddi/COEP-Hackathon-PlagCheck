@@ -6,9 +6,9 @@ def search_topic(topic):
     api_key = 'AIzaSyD-onHCczAr8ESUwyn0MvzVrT_tGRKYhN0'
     # Replace 'YOUR_SEARCH_ENGINE_ID' with your actual search engine ID
     search_engine_id = '83b84f97aeeaa4deb'
-    
+    query = f'"{topic}"'
     # Base URL for Google Custom Search API
-    url = f'https://www.googleapis.com/customsearch/v1?q={topic}&key={api_key}&cx={search_engine_id}&num=5'
+    url = f'https://www.googleapis.com/customsearch/v1?q={query}&key={api_key}&cx={search_engine_id}&num=5'
     results=[]
     try:
         response = requests.get(url)
