@@ -1,42 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compare Files</title>
-    <style>
-        table {
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-    </style>
-</head>
-
-<body>
-    <h1>Comparison Results</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>File 1 Chunks</th>
-                <th>File 2 Chunks</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for x in ans %}
-            <tr>
-                <td>{{x}}</td>
-                <td>{{ans[x]}}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-
-</html>
+{% block content %}
+<h1>Comparison Results</h1>
+<table>
+    <thead>
+        <tr>
+            <th>File 1 Chunks</th>
+            <th>File 2 Chunks</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for x in ans %}
+        <tr>
+            <td>{{x}}</td>
+            <td>{{ans[x]}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

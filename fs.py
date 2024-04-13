@@ -73,15 +73,17 @@ class File_Reader:
 
         return ans
 
-    def identify_type_of_given_file(self, file_path) -> str:
+    def isCode(self, file_path) -> str:
         """
         This function will return Code_Text for code and text files or Documents for writeups.
         """
         curr_ext = Path(file_path).suffix
-        if curr_ext in [".docx", ".pdf"]:
-            return "Documents"
+        if curr_ext in [".docx", ".pdf", ".txt"]:
+            return "Text"
         elif curr_ext in programming_file_extensions or curr_ext == ".ipynb":
-            return "Code_Text"
+            return "Code"
+        else:
+            return "Unsupported"
 
     def read_code_and_text_files(self, file_name: str) -> str:
         data = ""

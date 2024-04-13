@@ -129,7 +129,16 @@ def within():
                         rel_file_paths[j]
                     )["file_data"]
                     subarr = []
-                    simi = simhash_simi(file_content1, file_content2)
+                    file_type_res=File_Reader().isCode(rel_file_paths[j])
+                    # print(file_path)
+                    print(file_type_res)
+                    if(file_type_res=="Code"):
+                        simi = (simhash_simi(file_content1, file_content2)+get_tfidf_simi(file_content1,file_content2))/2
+                    elif file_type_res=="Text":
+                        simi=get_cosine_simi(file_content1,file_content2)
+                    else:
+                        print("Unsupported File Extension")
+                        simi=0
                     # simi=get_tfidf_simi(file_content1,file_content2)
                     subarr.append(simi)
                     subarr.append(rel_file_paths[i])
@@ -191,8 +200,16 @@ def local():
                         rel_file_paths2[j]
                     )["file_data"]
                     subarr = []
-                    simi = simhash_simi(file_content1, file_content2)
-                    # simi=get_tfidf_simi(file_content1,file_content2)
+                    file_type_res=File_Reader().isCode(rel_file_paths2[j])
+                    # print(file_path)
+                    # print(file_type_res)
+                    if(file_type_res=="Code"):
+                        simi = (simhash_simi(file_content1, file_content2)+get_tfidf_simi(file_content1,file_content2))/2
+                    elif file_type_res=="Text":
+                        simi=get_cosine_simi(file_content1,file_content2)
+                    else:
+                        print("Unsupported File Extension")
+                        simi=0
                     subarr.append(simi)
                     subarr.append(rel_file_paths1[i])
                     subarr.append(rel_file_paths2[j])
@@ -220,15 +237,17 @@ def download_file(assignment_id):
         file_path = os.path.join(f"../uploads/{assignment_id}", filename)
         file.save(file_path)
 
-        extract_zip_recursively(file_path, "../uploads/")
-        extract_zip_recursively(file_path, f"../cache/{assignment_id}/")
-
-        folder_structure1 = get_detailed_report_of_files("../uploads")
+        # extract_zip_recursively(file_path, "../uploads/")
+        # extract_zip_recursively(file_path, f"../cache/{assignment_id}/")
+        
+        extract_zip_recursively(file_path, f"../uploads/{assignment_id}")
+        extract_zip_recursively(f"../cache/{assignment_id}.zip", f"../cache/{assignment_id}/")
+        folder_structure1 = get_detailed_report_of_files(f"../uploads/{assignment_id}")
         fmap1 = get_file_mapping(folder_structure1)
-        print(fmap1)
+        # print(fmap1)
         folder_structure2 = get_detailed_report_of_files(f"../cache/{assignment_id}")
         fmap2 = get_file_mapping(folder_structure2)
-        print(fmap2)
+        # print(fmap2)
         superans = {}
         for ftype in fmap1.keys():
             rel_file_paths1 = fmap1[ftype]
@@ -247,8 +266,16 @@ def download_file(assignment_id):
                         rel_file_paths2[j]
                     )["file_data"]
                     subarr = []
-                    simi = simhash_simi(file_content1, file_content2)
-                    # simi=get_tfidf_simi(file_content1,file_content2)
+                    file_type_res=File_Reader().isCode(rel_file_paths2[j])
+                    # print(file_path)
+                    print(file_type_res)
+                    if(file_type_res=="Code"):
+                        simi = (simhash_simi(file_content1, file_content2)+get_tfidf_simi(file_content1,file_content2))/2
+                    elif file_type_res=="Text":
+                        simi=get_cosine_simi(file_content1,file_content2)
+                    else:
+                        print("Unsupported File Extension")
+                        simi=0
                     subarr.append(simi)
                     subarr.append(rel_file_paths1[i])
                     subarr.append(rel_file_paths2[j])
@@ -374,7 +401,8 @@ def uploadassg():
         semester = request.form["sem"]
         file = request.files["file"]
         filename = file.filename
-
+        file_path = os.path.join("../uploads", filename)
+        file.save(file_path)
         Database().create_record_and_upload_assignment(
             assignment_name, branch, year, div, batch, semester, filename
         )
