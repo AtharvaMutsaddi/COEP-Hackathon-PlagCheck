@@ -287,13 +287,15 @@ def local():
         flash("Please log in!", "Warning")
         return redirect(url_for("login"))
 
-@app.route("/download/<assignment_id>", methods=["GET", "POST"])
-def download_file(assignment_id):
+@app.route("/download/<assignment_id>/<owner_id>/<file_name>", methods=["GET", "POST"])
+def download_file(assignment_id, owner_id, file_name):
     if "user_id" in session:
         if request.method == "GET":
             user_id = session["user_id"]
-            Database().download_file(assignment_id, user_id=user_id)
-            return render_template("dbcompare.html", assignment_id=assignment_id)
+            print(assignment_id, ".")
+            Database().download_file(assignment_record_id=assignment_id, user_id=user_id)
+            Database().add_history_record_in_user_log(user_token=owner_id, file_accessed=file_name, consumer_user_token=user_id)
+            return render_template("dbcompare.html", assignment_id=assignment_id, owner_id=owner_id, file_name=file_name)
         else:
             file = request.files["file"]
             filename = file.filename
@@ -526,51 +528,68 @@ def comparefile():
 
 @app.route("/researchpaper", methods=["GET", "POST"])
 def researchpaper():
-    if request.method == "GET":
-        return render_template("researchpaper.html")
+    if "user_id" in session:
+        if request.method == "GET":
+            return render_template("researchpaper.html")
+        else:
+            abstract = request.form["abstract"]
+            print(abstract)
+            res = gptTopic(abstract)
+            # print("res\n",res)
+            file = request.files["file"]
+            filename = file.filename
+            file_path = os.path.join("../uploads", filename)
+            file.save(file_path)
+
+            if filename.endswith(".zip"):
+                filename = filename.split(".")[0]
+
+            extract_zip_recursively(file_path, "../uploads/")
+
+            folder_structure = get_detailed_report_of_files(f"../uploads/{filename}")
+            fmap = get_file_mapping(folder_structure)
+            superans = []
+            for ftype in fmap.keys():
+                rel_file_paths = fmap[ftype]
+                print("Number of websites", len(res))
+                for i in range(len(rel_file_paths)):
+                    file_content1 = File_Reader().get_type_of_file_and_data(
+                        rel_file_paths[i]
+                    )["file_data"]
+                    for j in range(len(res)):
+                        text = res[j][0][0]
+                        print(text)
+                        subarr = []
+                        simi = get_tfidf_simi(file_content1, text)
+                        subarr.append(simi)
+                        subarr.append(rel_file_paths[i])
+                        print("\n\nUrl", res[j][0][1])
+                        print("\n\nUrl\n", res[j])
+                        print("\n\n")
+                        subarr.append(res[j][1])
+                        superans.append(subarr)
+
+            superans = sorted(superans, reverse=True)
+            print("\n\nsuperans\n",superans)
+
+            return render_template("webresults.html", results=superans)
     else:
-        abstract = request.form["abstract"]
-        print(abstract)
-        res = gptTopic(abstract)
-        # print("res\n",res)
-        file = request.files["file"]
-        filename = file.filename
-        file_path = os.path.join("../uploads", filename)
-        file.save(file_path)
+        flash("Please log in!", "Warning")
+        return redirect(url_for("login"))
 
-        if filename.endswith(".zip"):
-            filename = filename.split(".")[0]
 
-        extract_zip_recursively(file_path, "../uploads/")
+@app.route("/logs", methods=["GET"])
+def logs():
+    if "user_id" in session:
+        user_id = session["user_id"]
 
-        folder_structure = get_detailed_report_of_files(f"../uploads/{filename}")
-        fmap = get_file_mapping(folder_structure)
-        superans = []
-        for ftype in fmap.keys():
-            rel_file_paths = fmap[ftype]
-            print("Number of websites", len(res))
-            for i in range(len(rel_file_paths)):
-                file_content1 = File_Reader().get_type_of_file_and_data(
-                    rel_file_paths[i]
-                )["file_data"]
-                for j in range(len(res)):
-                    text = res[j][0][0]
-                    print(text)
-                    subarr = []
-                    simi = get_tfidf_simi(file_content1, text)
-                    subarr.append(simi)
-                    subarr.append(rel_file_paths[i])
-                    print("\n\nUrl", res[j][0][1])
-                    print("\n\nUrl\n", res[j])
-                    print("\n\n")
-                    subarr.append(res[j][1])
-                    superans.append(subarr)
-
-        superans = sorted(superans, reverse=True)
-        print("\n\nsuperans\n",superans)
-
-        return render_template("webresults.html", results=superans)
-
+        logs = Database().get_all_history_records_for_user(user_token=user_id)
+        print(logs)
+        
+        return render_template("logs.html", logs=logs)
+    else:
+        flash("Please log in!", "Warning")
+        return redirect(url_for("login"))
 
 if __name__ == "__main__":
     clear_uploads_dir("../uploads/")

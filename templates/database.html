@@ -1,14 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<button class="text-white bg-indigo-500 border-0 py-2 mx-auto mt-4 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg" style="position: absolute; top: 5px; right: 20px; "><a href="/uploadassg" >Upload your assignment to database</a></button>
 <section class="text-gray-600 body-font relative bg-white mt-16">
-    <button class="text-white bg-indigo-500 border-0 py-2 mx-auto px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg"><a href="/uploadassg" >Upload your assignment to database</a></button>
     <div class="container px-5 py-20 mx-auto flex flex-wrap items-center">
         <form action="/database" method="POST" enctype="multipart/form-data"
             class="container px-5 mx-auto flex flex-wrap items-center">
             <div class="lg:w-3/5 md:w-1/2 md:pr-16 lg:pr-0 pr-0">
                 <h1 class="title-font font-medium text-3xl text-gray-900">Compare Uploaded Files With Database</h1>
                 <p class="leading-relaxed mt-4">To compare previous year assignments</p>
+                <a class="text-blue-500 hover:underline" href="/logs">Click to see who accessed your uploaded files from database</a>
             </div>
             <div class="lg:w-2/6 md:w-1/2 bg-gray-100 rounded-lg p-8 flex flex-col md:ml-auto w-full mt-10 md:mt-0">
                 <h2 class="text-gray-900 text-lg font-medium title-font mb-5">Enter Details</h2>
