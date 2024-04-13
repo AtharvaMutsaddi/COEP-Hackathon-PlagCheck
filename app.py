@@ -62,56 +62,65 @@ def gptpage():
 
 @app.route("/gpt", methods=["POST"])
 def gpt():
-    table_rows = []
-    option = request.form["option"]
-    message = request.form["message"]
-    message = message.lower().strip()
-    resp = ""
-    output = ""
-    # test_ipynb_fp="./uploads/testfiles-old/Project_Report.pdf"
-    # resp=File_Reader().get_type_of_file_and_data(test_ipynb_fp)["file_data"]
-    # if message in temp_cache.keys():
-    #     resp=temp_cache[message]
-    # else:
-    #     resp=getGPTResp(message,option)
-    #     temp_cache[message]=resp
+    if "user_id" in session:
+        table_rows = []
+        option = request.form["option"]
+        message = request.form["message"]
+        message = message.lower().strip()
+        resp = ""
+        output = ""
+        # test_ipynb_fp="./uploads/testfiles-old/Project_Report.pdf"
+        # resp=File_Reader().get_type_of_file_and_data(test_ipynb_fp)["file_data"]
+        # if message in temp_cache.keys():
+        #     resp=temp_cache[message]
+        # else:
+        #     resp=getGPTResp(message,option)
+        #     temp_cache[message]=resp
 
-    resp = getGPTResp(message, option)
-    resp = resp.replace("\\n", "\n")
-    print(resp)
-    file = request.files["file"]
+        resp = getGPTResp(message, option)
+        resp = resp.replace("\\n", "\n")
+        print(resp)
+        file = request.files["file"]
 
-    filename = file.filename
+        filename = file.filename
+        
+        user_id = session["user_id"]
+        
+        if not os.path.exists(f"../uploads/{user_id}"):
+                os.makedirs(f"../uploads/{user_id}")
 
-    file_path = os.path.join("../uploads", filename)
-    file.save(file_path)
+        file_path = os.path.join(f"../uploads/{user_id}", filename)
+        file.save(file_path)
 
-    if filename.endswith(".zip"):
-        filename = filename.split(".")[0]
+        if filename.endswith(".zip"):
+            filename = filename.split(".")[0]
 
-    extract_zip_recursively(file_path, "../uploads/")
+        extract_zip_recursively(file_path, f"../uploads/{user_id}")
 
-    folder_structure = get_detailed_report_of_files(f"../uploads/{filename}")
-    fmap = get_file_mapping(folder_structure)
-    for ftype in fmap.keys():
-        rel_file_paths = fmap[ftype]
-        for fp in rel_file_paths:
-            # fname=fp.split("/")[-1]
+        folder_structure = get_detailed_report_of_files(f"../uploads/{user_id}/{filename}")
+        fmap = get_file_mapping(folder_structure)
+        for ftype in fmap.keys():
+            rel_file_paths = fmap[ftype]
+            for fp in rel_file_paths:
+                # fname=fp.split("/")[-1]
 
-            # if(fname!=filename):
-            #     continue
-            file_content = File_Reader().get_type_of_file_and_data(fp)["file_data"]
-            simi = 0
-            if option == "code":
-                simi = simhash_simi(file_content, resp)
-                # simi = get_tfidf_simi(file_content, resp)
-            else:
-                simi = get_cosine_simi(file_content, resp)
+                # if(fname!=filename):
+                #     continue
+                file_content = File_Reader().get_type_of_file_and_data(fp)["file_data"]
+                simi = 0
+                if option == "code":
+                    simi = simhash_simi(file_content, resp)
+                    # simi = get_tfidf_simi(file_content, resp)
+                else:
+                    simi = get_cosine_simi(file_content, resp)
 
-            table_rows.append({"file_path": fp, "similarity_score": simi})
+                table_rows.append({"file_path": fp, "similarity_score": simi})
 
-    # clear_uploads_dir("../uploads")
-    return render_template("table.html", table_rows=table_rows)
+        # clear_uploads_dir("../uploads")
+        return render_template("table.html", table_rows=table_rows)
+    else:
+        flash("Please log in!", "danger")
+        return redirect(url_for("login"))
 
 
 @app.route("/within", methods=["GET", "POST"])
