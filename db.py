@@ -6,6 +6,7 @@ import datetime
 import pytz
 import os
 
+
 class Database:
     def __init__(self) -> None:
 
@@ -52,7 +53,7 @@ class Database:
         batch: str,
         semester: str,
         file_name: str,
-        user_id: str
+        user_id: str,
     ) -> None:
         """
         Use this function to save the assignmnet record with given propeties in db.It will do things create a entry for assignment record and also upload your file to mongodb. Make sure that file you want to upload is in the uploads directory. Just provide the name of file that is in the uploads directory
@@ -119,9 +120,9 @@ class Database:
         )
 
         out_data = self.fs.get(helper["file_id"]).read()
-        
+
         if not os.path.exists(f"../cache/{user_id}/{assignment_record_id}"):
-                os.makedirs(f"../cache/{user_id}/{assignment_record_id}")
+            os.makedirs(f"../cache/{user_id}/{assignment_record_id}")
 
         with open(f"../cache/{user_id}/{assignment_record_id}.zip", "wb") as f:
             f.write(out_data)
@@ -239,6 +240,18 @@ class Database:
             print("Error occured", e)
             return []
 
+    def get_user_access_token_from_email_id(self, email_id: str) -> str:
+        """
+        This will give you user token after you provide email id
+        """
+
+        record = self.db["users"].find_one({"email_id": email_id})
+        if record is None:
+            print("Record not found")
+            return ""
+        else:
+            return str(record["_id"])
+
 
 # Database().create_record_and_upload_assignment("A1","Computer Engineering","Third Year","Div1","T1","Even Sem","Assignment 1.zip")
 # Database().create_record_and_upload_assignment("A2","Electrical Engineering","Second Year","Div1","T2","Even Sem","test_dir_2.zip")
@@ -254,3 +267,4 @@ class Database:
 
 # Database().add_history_record_in_user_log("661a052071d8d8f0d045858f", "Abhishek.zip","661a055fc4485de8ec2d4e77")
 # print(Database().get_all_history_records_for_user("661a055fc4485de8ec2d4e7"))
+print(Database().get_user_access_token_from_email_id("shinde@gmail.com"))
