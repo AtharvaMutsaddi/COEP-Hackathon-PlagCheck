@@ -3,6 +3,7 @@ import gridfs
 import urllib.parse
 from bson import ObjectId
 import datetime
+import pytz
 
 
 class Database:
@@ -30,7 +31,7 @@ class Database:
 
         # CONFIG FOR LOCAL MONGODB
         connection = MongoClient("mongodb://localhost:27017")
-        print("Connected to MongoDB Cloud\n")
+        print("Connected to MongoDB Locally\n")
         self.db = connection["coep_hackathon"]
         self.fs = gridfs.GridFS(self.db, collection="files")
 
@@ -106,25 +107,7 @@ class Database:
             )
         )
 
-        # return list(set([item["name_of_assignment"] for item in records]))
         return records
-
-    # def get_assignment_records_from_db_using_4_params(
-    #     self, name_of_assignmnet: str, branch: str, year: str, semester: str
-    # ) -> list:
-    #     """
-    #     This function will fetch you all the assignmnet records from the database when uou provide the given 4 params
-    #     """
-    #     return list(
-    #         self.db["assignment_records"].find(
-    #             {
-    #                 "name_of_assignment": name_of_assignmnet,
-    #                 "branch": branch,
-    #                 "year": year,
-    #                 "semester": semester,
-    #             }
-    #         )
-    #     )
 
     def download_file(self, assignment_record_id) -> None:
         """
@@ -160,6 +143,71 @@ class Database:
         else:
             return ""
 
+    def add_user(self, email_id: str) -> str:
+        """
+        This function will be used to add the user
+        """
+        existing_record = list(self.db["users"].find({"email_id": email_id}))
+
+        if len(existing_record) != 0:
+            print("Cannot add this record as it already exists!")
+            return ""
+
+        new_user_record_id = self.db["users"].insert_one(
+            {"email_id": email_id, "logs_history": []}
+        )
+        pass
+
+        # Will return the newly created user id as its access token
+        return str(new_user_record_id.inserted_id)
+
+    def verify_user(self, email_id: str, user_token_enetered: str) -> bool:
+        """
+        This function will verify the user based upon the access token he entered
+        """
+
+        record = self.db["users"].find_one({"email_id": email_id})
+
+        if record is None:
+            print("No user with this email id!")
+            return False
+        else:
+            expected_user_token = str(record["_id"])
+            if expected_user_token == user_token_enetered:
+                print("User Verification Successfull!")
+                return True
+            else:
+                print("User Verification Unsuccessfull!")
+                return False
+
+    def add_history_record_in_user_log(self, user_token, file_accessed) -> None:
+        """
+        This function will add the file accessed by the user to his logs and max limit is 2 so at any point of time it will only store the latest 2 log records
+        """
+
+        try:
+            record_id = ObjectId(user_token)
+            user_record = self.db["users"].find_one({"_id": record_id})
+            if user_record is None:
+                print("User does not exist")
+                return
+            else:
+                utc_now = datetime.datetime.utcnow()
+                ist_tz = pytz.timezone("Asia/Kolkata")
+                ist_now = str(utc_now.astimezone(ist_tz))
+
+                if len(user_record["logs_history"] == 2):
+                    user_record["logs_history"] = user_record["logs_history"][1::]
+
+                user_record["logs_history"].append(
+                    {"file_accessed": file_accessed, "date_time": ist_now}
+                )
+
+                user_record.save()
+
+        except:
+            print("Error occurred")
+
 
 # Database().create_record_and_upload_assignment("A1","Computer Engineering","Third Year","Div1","T1","Even Sem","Assignment 1.zip")
 # Database().create_record_and_upload_assignment("A2","Electrical Engineering","Second Year","Div1","T2","Even Sem","test_dir_2.zip")
@@ -169,3 +217,5 @@ class Database:
 # Database().create_record_and_upload_assignment("A6","Computer Engineering","Third Year","Div2","T2","Even Sem","test_dir_6.zip")
 # print(Database().get_assignment_records_from_db("Test 13","Computer Engineering","Third Year",))
 
+# print(Database().add_user("apc9214@gmail.com"))
+# print(Database().verify_user("apc9214@gmail.com","661a006a149cb69342558a3"))

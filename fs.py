@@ -74,9 +74,6 @@ class File_Reader:
         return ans
 
     def isCode(self, file_path) -> str:
-        """
-        This function will return Code_Text for code and text files or Documents for writeups.
-        """
         curr_ext = Path(file_path).suffix
         if curr_ext in [".docx", ".pdf", ".txt"]:
             return "Text"
@@ -160,14 +157,17 @@ def get_file_mapping(all_files: list):
 
         if curr_ext not in ans:
             ans[curr_ext] = []
-            
+
         ans[curr_ext].append(item)
     return ans
+
 
 def sort_results(results: dict):
     sorted_results = {}
     for key in results.keys():
-        sorted_results[key] = sorted([x for x in results[key] if x[1] != x[2]], key=lambda x: x[0], reverse=True)
+        sorted_results[key] = sorted(
+            [x for x in results[key] if x[1] != x[2]], key=lambda x: x[0], reverse=True
+        )
     return sorted_results
 
 
