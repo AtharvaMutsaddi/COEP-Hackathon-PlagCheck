@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Comparison Results</h1>
+<table>
+    <thead>
+        <tr>
+            <th>File 1 Chunks</th>
+            <th>File 2 Chunks</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for x in ans %}
+        <tr>
+            <td>{{x}}</td>
+            <td>{{ans[x]}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

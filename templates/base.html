@@ -4,9 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <link rel="stylesheet" href="../static/css/main.css"> -->
-    <!-- <title>{% block title %}Document{% endblock %}</title> -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{% block title %}Document{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 
 <body class="bg-white">
@@ -17,21 +16,29 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
                     stroke-linejoin="round" stroke-width="2" class="w-10 h-10 text-white p-2 bg-indigo-500 rounded-full"
                     viewBox="0 0 24 24">
-                    <path
-                        d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5">
                     </path>
                 </svg>
-                <a class="mr-5 hover:text-gray-900" href="/"><span
-                        class="ml-3 text-xl">Plag Detection</span></a>
+                <a class="mr-5 hover:text-gray-900" href="/home"><span class="ml-3 text-xl">Plag Detection</span></a>
             </a>
-            <nav
-                class="md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-400 flex flex-wrap items-center text-base justify-center">
-                <a class="mr-5 hover:text-gray-900" href="/gptpage">GPT Check</a>
-            </nav>
         </div>
     </header>
 
     <div class="container mx-auto py-8 px-4">
+        <div class="messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <ul class="messages">
+                {% for category, message in messages %}
+                <li class="py-2 px-4 mb-2 rounded-lg bg-gray-200 text-gray-800">
+                    <strong>{{ category }}:</strong> {{ message }}
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+        </div>
+
         {% block content %}
         {% endblock %}
     </div>
