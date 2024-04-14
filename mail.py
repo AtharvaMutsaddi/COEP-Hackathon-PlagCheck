@@ -3,8 +3,8 @@ import ssl, smtplib
 
 
 def send_email(email_reciever: str, body: str) -> None:
-    email_sender = "coeptechhackathon20@gmail.com"
-    email_password = "gbww hcgl unkn xotu"
+    email_sender = "YOUR_EMAIL_ID"
+    email_password = "YOUR_PASSWORD"
 
     subject = "REGARDING FORGOT ACCESS TOKEN FROM BITBUSTERS"
 
