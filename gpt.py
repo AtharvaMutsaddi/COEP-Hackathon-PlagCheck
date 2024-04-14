@@ -8,7 +8,7 @@ def getGPTResp(prb_stat:str,option:str):
   cache_result = database.check_and_get_cache_response_for_query(prb_stat)
   if cache_result != "":
     return cache_result
-  client = OpenAI(api_key="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")
+  client = OpenAI(api_key="YOUR_API_KEY")
   prompt=f"Give me a {option} for the following problem statement:{prb_stat}"
   content=f"Generate a complete {option} for the given question and return ONLY the {option} without any comments or any description."
   completion = client.chat.completions.create(

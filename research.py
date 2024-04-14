@@ -11,7 +11,7 @@ def gptTopic(abstract:str):
 
     prompt = PromptTemplate.from_template(template)
 
-    llm = OpenAI(openai_api_key="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")
+    llm = OpenAI(openai_api_key="YOUR_API_KEY")
 
     llm_chain = LLMChain(prompt=prompt, llm=llm)
 

@@ -3,11 +3,10 @@ from bs4 import BeautifulSoup
 
 def search_topic(topic):
     # Replace 'YOUR_API_KEY' with your actual API key
-    # api_key = 'AIzaSyD-onHCczAr8ESUwyn0MvzVrT_tGRKYhN0'
-    api_key = 'AIzaSyCoRbpSkOMQvnDrGLNEQmITHarqpJKJY4I'
+    api_key = 'YOUR_API_KEY'
 
     # Replace 'YOUR_SEARCH_ENGINE_ID' with your actual search engine ID
-    search_engine_id = '8119621a04913439a'
+    search_engine_id = 'YOUR_SEARCH_ENGINE_ID'
     query = f'{topic}'
     # Base URL for Google Custom Search API
     url = f'https://www.googleapis.com/customsearch/v1?q={query}&key={api_key}&cx={search_engine_id}&num=5'
@@ -34,7 +33,7 @@ def extract_content(url):
         # For example, to extract all paragraphs, you can do:
         paragraphs = soup.find_all('p')
         content = '\n'.join([p.get_text() for p in paragraphs])
-        return content,url  # Print the first 300 characters of the content
+        return content,url  
         
     except Exception as e:
         print("An error occurred while extracting content from", url, ":", e)
